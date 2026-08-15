@@ -1,7 +1,7 @@
 services:
   - type: web
     name: hisoblash-finance-bot
-    env: python
+    runtime: python
     region: frankfurt
     plan: free
     buildCommand: mkdir -p data && pip install -r requirements.txt && python -m alembic upgrade head
@@ -17,3 +17,5 @@ services:
         value: production
       - key: LOG_LEVEL
         value: INFO
+      - key: PYTHON_VERSION
+        value: 3.12.0
