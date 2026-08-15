@@ -37,6 +37,12 @@ _db_url = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./data/finance.db")
 # Convert async URL to sync for Alembic (which runs synchronously)
 sync_url = _db_url.replace("+aiosqlite", "")
 
+# Ensure directory for SQLite database file exists before connecting
+if "sqlite" in sync_url:
+    path_part = sync_url.split("sqlite:///")[-1].split("?")[0]
+    if path_part and not path_part.startswith(":memory:"):
+        Path(path_part).resolve().parent.mkdir(parents=True, exist_ok=True)
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.

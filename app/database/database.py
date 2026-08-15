@@ -20,7 +20,14 @@ def _get_engine():
     """Get or create the async engine (lazy initialization)."""
     global _engine
     if _engine is None:
+        from pathlib import Path
         from app.core.config import settings
+
+        if "sqlite" in settings.database_url:
+            path_part = settings.database_url.split("sqlite+aiosqlite:///")[-1].split("?")[0]
+            if path_part and not path_part.startswith(":memory:"):
+                Path(path_part).resolve().parent.mkdir(parents=True, exist_ok=True)
+
         _engine = create_async_engine(
             settings.database_url,
             echo=False,
