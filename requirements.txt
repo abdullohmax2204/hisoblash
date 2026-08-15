@@ -1,0 +1,19 @@
+# Telegram Bot
+aiogram>=3.10,<4.0
+
+# Database
+SQLAlchemy[asyncio]>=2.0,<3.0
+aiosqlite>=0.20.0
+
+# Migrations
+alembic>=1.13
+
+# Configuration
+python-dotenv>=1.0
+
+# Testing
+pytest>=8.0
+pytest-asyncio>=0.23
+
+# Async event loop (Windows compatibility)
+# aiogram uses uvloop on Linux automatically, but we need this for Windows

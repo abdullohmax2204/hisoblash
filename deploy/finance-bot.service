@@ -1,0 +1,22 @@
+[Unit]
+Description=Hisoblash Finance Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+User=finance-bot
+Group=finance-bot
+WorkingDirectory=/opt/finance-bot
+ExecStart=/opt/finance-bot/.venv/bin/python -m app
+Restart=always
+RestartSec=10
+EnvironmentFile=/opt/finance-bot/.env
+
+# Security hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/finance-bot/data /opt/finance-bot/logs /opt/finance-bot/backups
+
+[Install]
+WantedBy=multi-user.target
