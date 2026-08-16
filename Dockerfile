@@ -2,6 +2,10 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# Prevent Python from writing .pyc and enable unbuffered output
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
 # Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -15,4 +19,4 @@ COPY alembic.ini .
 RUN mkdir -p data logs backups
 
 # Run migrations and start the bot
-CMD alembic upgrade head && python -m app
+CMD ["sh", "-c", "python -m alembic upgrade head && python -m app"]
