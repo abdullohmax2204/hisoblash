@@ -10,6 +10,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
+import aiohttp
 from aiohttp import web
 
 from app.core.config import settings
@@ -32,6 +33,20 @@ from app.bot.handlers import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+async def keep_alive_task(url: str, interval_seconds: int = 480) -> None:
+    """Periodically ping public URL to prevent free cloud instances from sleeping."""
+    logger.info("Keep-alive task started for URL: %s (interval: %ds)", url, interval_seconds)
+    await asyncio.sleep(60)  # Wait 1 minute after start before first ping
+    async with aiohttp.ClientSession() as session:
+        while True:
+            try:
+                async with session.get(url, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                    logger.info("Keep-alive ping sent to %s -> HTTP %d", url, resp.status)
+            except Exception as e:
+                logger.warning("Keep-alive ping error: %s", e)
+            await asyncio.sleep(interval_seconds)
 
 
 async def start_healthcheck_server(port: int) -> web.AppRunner:
@@ -113,12 +128,24 @@ async def main() -> None:
         except Exception as e:
             logger.warning("Failed to start healthcheck server on port %s: %s", port_env, e)
 
+    # Automatic self-ping to prevent free instances from sleeping
+    keep_alive_handle = None
+    app_url = os.getenv("RENDER_EXTERNAL_URL") or os.getenv("APP_URL")
+    if app_url:
+        if not app_url.startswith("http"):
+            app_url = f"https://{app_url}"
+        if not app_url.endswith("/health"):
+            app_url = f"{app_url.rstrip('/')}/health"
+        keep_alive_handle = asyncio.create_task(keep_alive_task(app_url))
+
     try:
         logger.info("Bot is running. Press Ctrl+C to stop.")
         # Delete webhook + start polling
         await bot.delete_webhook(drop_pending_updates=True)
         await dp.start_polling(bot)
     finally:
+        if keep_alive_handle is not None:
+            keep_alive_handle.cancel()
         if web_runner is not None:
             await web_runner.cleanup()
         await close_db()
