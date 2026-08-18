@@ -19,10 +19,12 @@
     <!-- Top Header -->
     <header class="app-header">
       <div class="user-profile">
-        <div class="avatar" id="userAvatar">💰</div>
+        <div class="avatar" id="userAvatar">👤</div>
         <div class="user-details">
-          <span class="greeting" id="greetingText">Привет!</span>
-          <h2 class="user-name" id="userName">Hisoblash Finance</h2>
+          <div class="profile-switch-bar" style="display: flex; align-items: center; gap: 6px;">
+            <select id="userProfileSelect" class="profile-select" onchange="switchUserProfile(this.value)" style="background: rgba(15, 23, 42, 0.8); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 4px 8px; font-weight: 700; font-size: 13px; max-width: 170px;"></select>
+            <button class="btn-xs-outline" onclick="openModal('modalNewProfile')" title="Добавить еще аккаунт">+ Профиль</button>
+          </div>
         </div>
       </div>
       <button class="icon-btn" id="refreshBtn" title="Обновить" aria-label="Refresh">
@@ -147,6 +149,42 @@
           </div>
           <div class="goals-list" id="savingsGoalsList">
             <!-- Goals injected here -->
+          </div>
+        </div>
+
+        <!-- BUDGET LOAD STRESS WIDGET -->
+        <div class="budget-load-card" id="budgetLoadWidget">
+          <div class="budget-load-header">
+            <div class="budget-load-title">
+              <span>⚡ Нагрузка на бюджет</span>
+              <span id="loadStatusBadge" class="status-badge green">🟢 0%</span>
+            </div>
+            <button class="btn-xs-outline" onclick="openSalaryModal()">⚙️ Доход</button>
+          </div>
+          
+          <div class="budget-load-body">
+            <div class="load-metrics-grid">
+              <div class="load-metric-box">
+                <span class="load-metric-label">Требуется в месяц:</span>
+                <span class="load-metric-val" id="loadMonthlyVal">0 сум/мес</span>
+              </div>
+              <div class="load-metric-box">
+                <span class="load-metric-label">За 15 дней (аванс):</span>
+                <span class="load-metric-val" id="load15DayVal">0 сум/15дн</span>
+              </div>
+            </div>
+
+            <div class="stress-bar-container">
+              <div class="stress-bar-fill green" id="stressBarFill" style="width: 0%;"></div>
+            </div>
+
+            <p class="load-recommendation" id="loadRecommendationText">
+              Укажите зарплату для расчета финансовой нагрузки.
+            </p>
+
+            <div class="load-goals-breakdown" id="loadGoalsBreakdown">
+              <!-- Goal load items injected here -->
+            </div>
           </div>
         </div>
       </section>
@@ -499,7 +537,39 @@
             <input type="number" id="newGoalTarget" class="form-input" placeholder="0" required min="1" max="1000000000000">
           </div>
 
+          <div class="form-group">
+            <label>Срок цели / Дедлайн (опционально)</label>
+            <input type="date" id="newGoalDate" class="form-input">
+          </div>
+
           <button type="submit" class="btn-submit btn-accent">Создать цель</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: SALARY / PAY CYCLE SETTINGS -->
+    <div id="modalSalary" class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>⚙️ Настройка дохода и зарплаты</h3>
+          <button class="close-modal" onclick="closeModal('modalSalary')">✕</button>
+        </div>
+        <form id="formSalary" onsubmit="submitSalaryForm(event)">
+          <div class="form-group">
+            <label>Ежемесячная зарплата (сум)</label>
+            <input type="number" id="salaryMonthlyInput" class="form-input" placeholder="Например: 5000000" min="0" max="1000000000000">
+            <small class="form-help" style="color: var(--text-muted); font-size: 11px;">Используется для расчёта % нагрузки ваших целей на бюджет.</small>
+          </div>
+
+          <div class="form-group">
+            <label>Периодичность выплат</label>
+            <select id="salaryCycleInput" class="form-select">
+              <option value="30">1 раз в месяц (30 дней)</option>
+              <option value="15">2 раза в месяц (каждые 15 дней / аванс+зарплата)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-submit btn-accent">Сохранить</button>
         </form>
       </div>
     </div>
@@ -531,6 +601,25 @@
           </div>
 
           <button type="submit" class="btn-submit btn-purple" id="debtSubmitBtn">Подтвердить</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: NEW PROFILE -->
+    <div id="modalNewProfile" class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>👤 Создать новый профиль</h3>
+          <button class="close-modal" onclick="closeModal('modalNewProfile')">✕</button>
+        </div>
+        <form id="formNewProfile" onsubmit="submitNewProfile(event)">
+          <div class="form-group">
+            <label>Название профиля / Аккаунт</label>
+            <input type="text" id="newProfileName" class="form-input" placeholder="Например: Второй аккаунт, Мой тест..." required maxlength="40">
+            <small class="form-help" style="color: var(--text-muted); font-size: 11px;">Каждый профиль имеет полностью свои счета, категории и историю без изменения кода.</small>
+          </div>
+
+          <button type="submit" class="btn-submit btn-accent">Создать профиль</button>
         </form>
       </div>
     </div>

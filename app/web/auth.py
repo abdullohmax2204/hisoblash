@@ -49,11 +49,13 @@ def validate_telegram_init_data(init_data: str, bot_token: str) -> dict | None:
         return None
 
 
-def get_authenticated_user_id(init_data: str | None) -> tuple[int | None, str | None]:
-    """Extract authenticated telegram_id and name.
+def get_authenticated_user_id(
+    init_data: str | None,
+    profile_id_header: str | int | None = None,
+) -> tuple[int | None, str | None, int | None]:
+    """Extract authenticated telegram_id and name, or explicit user_id.
     
-    If valid initData is provided, returns (telegram_id, full_name).
-    In development mode or as a fallback for the admin, allows fallback.
+    Returns (telegram_id, full_name, explicit_user_id)
     """
     if init_data:
         user_info = validate_telegram_init_data(init_data, settings.bot_token)
@@ -62,10 +64,13 @@ def get_authenticated_user_id(init_data: str | None) -> tuple[int | None, str | 
             first_name = user_info.get("first_name", "")
             last_name = user_info.get("last_name", "")
             full_name = f"{first_name} {last_name}".strip() or f"User {tg_id}"
-            return tg_id, full_name
+            return tg_id, full_name, None
+
+    if profile_id_header:
+        try:
+            return None, None, int(profile_id_header)
+        except (ValueError, TypeError):
+            pass
 
     # Development / Single-user fallback
-    if settings.is_development or not init_data:
-        return settings.admin_user_id, "Admin User"
-
-    return None, None
+    return settings.admin_user_id, "Admin User", None

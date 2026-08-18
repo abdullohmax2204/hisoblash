@@ -38,11 +38,12 @@ async def engine():
 
 
 @pytest_asyncio.fixture
-async def session(engine):
+async def session(engine, monkeypatch):
     """Create a fresh database session for each test."""
     session_factory = async_sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
+    monkeypatch.setattr("app.web.api.async_session_factory", session_factory)
     async with session_factory() as session:
         yield session
 

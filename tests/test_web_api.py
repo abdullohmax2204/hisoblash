@@ -166,5 +166,24 @@ async def test_web_app_endpoints(session, test_user, test_accounts, test_categor
         history = await resp.json()
         assert len(history["transactions"]) > 0
 
+        # 9. Multi-User Profile Switcher API
+        resp = await client.get("/api/users")
+        assert resp.status == 200
+        users_data = await resp.json()
+        assert "users" in users_data
+        assert "current_user_id" in users_data
+
+        resp = await client.post("/api/users/create", json={"name": "Тестовый профиль 2"})
+        assert resp.status == 201
+        new_profile = await resp.json()
+        assert new_profile["name"] == "Тестовый профиль 2"
+        new_profile_id = new_profile["id"]
+
+        # Switch to new profile via header X-Profile-Id
+        resp = await client.get("/api/summary", headers={"X-Profile-Id": str(new_profile_id)})
+        assert resp.status == 200
+        new_summary = await resp.json()
+        assert new_summary["user_name"] == "Тестовый профиль 2"
+
     finally:
         await client.close()

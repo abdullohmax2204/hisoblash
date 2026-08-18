@@ -47,6 +47,8 @@ def create_web_app() -> web.Application:
     app.router.add_get("/health", handle_health)
 
     # API Routes
+    app.router.add_get("/api/users", api.handle_get_users)
+    app.router.add_post("/api/users/create", api.handle_create_user_profile)
     app.router.add_get("/api/summary", api.handle_summary)
     app.router.add_get("/api/accounts", api.handle_get_accounts)
     app.router.add_post("/api/accounts", api.handle_create_account)
@@ -57,10 +59,12 @@ def create_web_app() -> web.Application:
     app.router.add_post("/api/transactions/transfer", api.handle_transfer)
     app.router.add_delete("/api/transactions/{id}", api.handle_delete_transaction)
     app.router.add_get("/api/savings", api.handle_get_savings)
+    app.router.add_get("/api/savings/load-analysis", api.handle_get_load_analysis)
     app.router.add_post("/api/savings/deposit", api.handle_savings_deposit)
     app.router.add_post("/api/savings/withdraw", api.handle_savings_withdraw)
     app.router.add_post("/api/savings/goals", api.handle_create_goal)
     app.router.add_delete("/api/savings/goals/{id}", api.handle_delete_goal)
+    app.router.add_post("/api/user/salary", api.handle_update_salary)
     app.router.add_get("/api/debts", api.handle_get_debts)
     app.router.add_post("/api/debts/give", api.handle_give_debt)
     app.router.add_post("/api/debts/take", api.handle_take_debt)

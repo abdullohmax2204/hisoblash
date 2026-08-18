@@ -92,6 +92,11 @@ async function apiFetch(endpoint, options = {}) {
     headers['X-Telegram-Init-Data'] = tg.initData;
   }
 
+  const activeProfileId = localStorage.getItem('activeProfileId');
+  if (activeProfileId) {
+    headers['X-Profile-Id'] = activeProfileId;
+  }
+
   try {
     const res = await fetch(endpoint, {
       ...options,
@@ -119,8 +124,18 @@ async function loadSummary() {
     renderDashboard();
     renderAccountsList();
     renderGoals();
+    await loadLoadAnalysis();
   } catch (err) {
     showToast('Ошибка загрузки данных', 'error');
+  }
+}
+
+async function loadLoadAnalysis() {
+  try {
+    const analysis = await apiFetch('/api/savings/load-analysis');
+    renderLoadAnalysis(analysis);
+  } catch (err) {
+    console.error('Error loading load analysis:', err);
   }
 }
 
@@ -293,11 +308,63 @@ function renderGoals() {
           <button class="goal-delete-btn" onclick="deleteGoal(${g.id})" title="Удалить">✕</button>
         </div>
       </div>
+      ${g.target_date ? `<div style="font-size:11px; color:#94a3b8; margin-top:-2px; margin-bottom:6px;">⏳ Дедлайн: ${formatDate(g.target_date)}</div>` : ''}
       <div class="progress-bar-container">
         <div class="progress-bar-fill" style="width: ${Math.min(g.pct, 100)}%;"></div>
       </div>
     </div>
   `).join('');
+}
+
+function renderLoadAnalysis(a) {
+  if (!a) return;
+
+  const badge = document.getElementById('loadStatusBadge');
+  const monthlyVal = document.getElementById('loadMonthlyVal');
+  const val15Day = document.getElementById('load15DayVal');
+  const barFill = document.getElementById('stressBarFill');
+  const recText = document.getElementById('loadRecommendationText');
+  const breakdownContainer = document.getElementById('loadGoalsBreakdown');
+
+  if (badge) {
+    badge.textContent = `${a.stress_icon} ${a.stress_pct}%`;
+    badge.className = `status-badge ${a.stress_level}`;
+  }
+
+  if (monthlyVal) monthlyVal.textContent = `${formatMoney(a.total_required_monthly)}/мес`;
+  if (val15Day) val15Day.textContent = `${formatMoney(a.total_required_15day)}/15дн`;
+
+  if (barFill) {
+    barFill.style.width = `${Math.min(a.stress_pct, 100)}%`;
+    barFill.className = `stress-bar-fill ${a.stress_level}`;
+  }
+
+  if (recText) {
+    recText.textContent = a.recommendation;
+  }
+
+  if (breakdownContainer) {
+    if (!a.goals || !a.goals.length) {
+      breakdownContainer.innerHTML = '';
+      return;
+    }
+
+    breakdownContainer.innerHTML = a.goals.map(g => {
+      const dateInfo = g.target_date ? `⏳ дедлайн: ${formatDate(g.target_date)} (${g.months_left} мес)` : 'без даты (расчет на 12 мес)';
+      return `
+        <div class="load-goal-item">
+          <div>
+            <div class="load-goal-name">${g.name}</div>
+            <div class="load-goal-details" style="text-align: left; font-size: 11px; color: #94a3b8;">${dateInfo}</div>
+          </div>
+          <div class="load-goal-details">
+            <div class="load-goal-req">${formatMoney(g.required_monthly)}/мес</div>
+            <div style="font-size: 11px; color: #94a3b8;">(${formatMoney(g.required_15day)}/15дн)</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 }
 
 function renderDebtsList() {
@@ -670,16 +737,40 @@ async function submitNewGoal(e) {
   await handleFormSubmit(e, async () => {
     const name = document.getElementById('newGoalName').value;
     const target_amount = document.getElementById('newGoalTarget').value;
+    const target_date = document.getElementById('newGoalDate').value;
 
     try {
       await apiFetch('/api/savings/goals', {
         method: 'POST',
-        body: JSON.stringify({ name, target_amount }),
+        body: JSON.stringify({ name, target_amount, target_date }),
       });
       closeModal('modalNewGoal');
       document.getElementById('formNewGoal').reset();
       showToast('Новая цель создана!');
       await loadSummary();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  });
+}
+
+function openSalaryModal() {
+  openModal('modalSalary');
+}
+
+async function submitSalaryForm(e) {
+  await handleFormSubmit(e, async () => {
+    const monthly_salary = document.getElementById('salaryMonthlyInput').value;
+    const pay_cycle_days = document.getElementById('salaryCycleInput').value;
+
+    try {
+      const analysis = await apiFetch('/api/user/salary', {
+        method: 'POST',
+        body: JSON.stringify({ monthly_salary, pay_cycle_days }),
+      });
+      closeModal('modalSalary');
+      showToast('Настройки дохода сохранены!');
+      renderLoadAnalysis(analysis);
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -818,6 +909,70 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Load initial data
+  await loadUserProfiles();
   await loadSummary();
   await loadCategories();
 });
+
+// ==================== PROFILES MANAGEMENT ====================
+
+async function loadUserProfiles() {
+  try {
+    const data = await apiFetch('/api/users');
+    const select = document.getElementById('userProfileSelect');
+    if (!select) return;
+
+    select.innerHTML = '';
+    const currentActive = data.current_user_id;
+
+    data.users.forEach((u) => {
+      const option = document.createElement('option');
+      option.value = u.id;
+      option.textContent = u.name || `Профиль #${u.id}`;
+      if (String(u.id) === String(currentActive)) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+
+    if (!localStorage.getItem('activeProfileId') && currentActive) {
+      localStorage.setItem('activeProfileId', currentActive);
+    }
+  } catch (err) {
+    console.warn('Could not load user profiles:', err);
+  }
+}
+
+async function switchUserProfile(profileId) {
+  if (!profileId) return;
+  haptic('medium');
+  localStorage.setItem('activeProfileId', profileId);
+  showToast('Переключение профиля...', 'success');
+  await loadSummary();
+  await loadCategories();
+}
+
+async function submitNewProfile(e) {
+  e.preventDefault();
+  const input = document.getElementById('newProfileName');
+  const name = input?.value?.trim();
+  if (!name) return;
+
+  try {
+    haptic('light');
+    const newUser = await apiFetch('/api/users/create', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    });
+
+    closeModal('modalNewProfile');
+    if (input) input.value = '';
+    showToast(`Профиль "${newUser.name}" создан!`, 'success');
+    
+    // Switch to new profile
+    await switchUserProfile(newUser.id);
+    await loadUserProfiles();
+  } catch (err) {
+    showToast(err.message || 'Ошибка создания профиля', 'error');
+  }
+}

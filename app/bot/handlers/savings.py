@@ -68,16 +68,27 @@ async def show_savings_menu(
         overall_bar = make_progress_bar(balance, total_target)
         lines.append(f"\n🎯 <b>Общая сумма всех целей:</b> {format_amount(total_target)} сум")
         lines.append(f"📊 <b>Общий прогресс:</b> {overall_bar}\n")
+
+        load_analysis = await savings_service.get_financial_load_analysis(user.id)
+        if load_analysis["goals"]:
+            lines.append(
+                f"⚡ <b>Нагрузка на зарплату:</b> {load_analysis['stress_icon']} <b>{load_analysis['stress_pct']}%</b> ({load_analysis['stress_level_ru']})"
+            )
+            lines.append(
+                f"💳 Откладывать: <b>{format_amount(load_analysis['total_required_monthly'])} сум/мес</b> (или {format_amount(load_analysis['total_required_15day'])} сум каждые 15 дн)\n"
+            )
+
         lines.append("<b>Ваши цели:</b>")
 
         for item in overview["goals"]:
             g = item["goal"]
             target = item["target"]
+            date_str = f" (до {g.target_date.strftime('%d.%m.%Y')})" if g.target_date else ""
             if item["is_funded"]:
-                lines.append(f"✅ <b>{g.name}</b>: {format_amount(target)} сум — <i>Накоплено! 🎉</i>")
+                lines.append(f"✅ <b>{g.name}</b>{date_str}: {format_amount(target)} сум — <i>Накоплено! 🎉</i>")
             else:
                 bar = make_progress_bar(balance, target, length=6)
-                lines.append(f"🎯 <b>{g.name}</b>: {format_amount(target)} сум\n   {bar}")
+                lines.append(f"🎯 <b>{g.name}</b>{date_str}: {format_amount(target)} сум\n   {bar}")
     else:
         lines.append("\n<i>🎯 Цели пока не добавлены. Добавьте цели, чтобы видеть общий прогресс накоплений!</i>")
 

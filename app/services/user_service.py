@@ -98,3 +98,46 @@ async def ensure_user_exists(
     await session.flush()
     logger.info("Created user with defaults: user_id=%d", user.id)
     return user
+
+
+async def update_user_salary(
+    session: AsyncSession,
+    user_id: int,
+    monthly_salary: Decimal | None,
+    pay_cycle_days: int = 30,
+) -> User:
+    """Update user's monthly salary and pay cycle period (15 or 30 days)."""
+    user = await session.get(User, user_id)
+    if not user:
+        raise ValueError("Пользователь не найден")
+
+    if monthly_salary is not None and monthly_salary < Decimal("0"):
+        raise ValueError("Зарплата не может быть отрицательной")
+
+    if pay_cycle_days not in (15, 30):
+        pay_cycle_days = 30
+
+    user.monthly_salary = monthly_salary
+    user.pay_cycle_days = pay_cycle_days
+    await session.flush()
+    return user
+
+
+async def get_all_users(session: AsyncSession) -> list[User]:
+    """Get all registered user profiles in the database."""
+    result = await session.execute(select(User).order_by(User.id.asc()))
+    return list(result.scalars().all())
+
+
+async def create_extra_profile(
+    session: AsyncSession,
+    name: str,
+) -> User:
+    """Create a new independent profile/user for testing or secondary accounts."""
+    import random
+    rand_tg_id = random.randint(900000000, 999999999)
+    return await ensure_user_exists(
+        session=session,
+        telegram_id=rand_tg_id,
+        name=name.strip() or f"Профиль {rand_tg_id}",
+    )

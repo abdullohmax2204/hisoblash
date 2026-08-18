@@ -1,7 +1,8 @@
 """SavingGoal model — goals and targets for savings."""
 
+from datetime import date
 from decimal import Decimal
-from sqlalchemy import ForeignKey, Numeric, String, Boolean
+from sqlalchemy import ForeignKey, Numeric, String, Boolean, Date
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.models.base import Base, TimestampMixin
@@ -18,6 +19,7 @@ class SavingGoal(Base, TimestampMixin):
     target_amount: Mapped[Decimal] = mapped_column(
         Numeric(precision=15, scale=2), nullable=False
     )
+    target_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     # Relationships

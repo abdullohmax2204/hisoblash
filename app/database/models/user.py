@@ -1,6 +1,7 @@
 """User model."""
 
-from sqlalchemy import BigInteger, String
+from decimal import Decimal
+from sqlalchemy import BigInteger, String, Numeric, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.models.base import Base, TimestampMixin
@@ -19,6 +20,10 @@ class User(Base, TimestampMixin):
     telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     currency: Mapped[str] = mapped_column(String(10), default="UZS", nullable=False)
+    monthly_salary: Mapped[Decimal | None] = mapped_column(
+        Numeric(precision=15, scale=2), nullable=True
+    )
+    pay_cycle_days: Mapped[int] = mapped_column(Integer, default=30, nullable=False)
 
     # Relationships
     accounts = relationship("Account", back_populates="user", lazy="selectin")

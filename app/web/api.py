@@ -1,5 +1,6 @@
 """REST API handlers for Telegram Mini App."""
 
+from datetime import date
 from decimal import Decimal
 import json
 import logging
@@ -15,7 +16,7 @@ from app.services.finance_service import FinanceService
 from app.services.history_service import HistoryService
 from app.services.savings_service import SavingsService
 from app.services.statistics_service import StatisticsService
-from app.services.user_service import ensure_user_exists
+from app.services.user_service import ensure_user_exists, update_user_salary, get_all_users, create_extra_profile
 from app.web.auth import get_authenticated_user_id
 
 logger = logging.getLogger(__name__)
@@ -37,20 +38,63 @@ def json_response(data: dict | list, status: int = 200) -> web.Response:
 async def get_current_user(request: web.Request, session) -> int:
     """Extract and ensure user from request headers or query params."""
     init_data = request.headers.get("X-Telegram-Init-Data") or request.query.get("init_data")
-    telegram_id, full_name = get_authenticated_user_id(init_data)
+    profile_id = request.headers.get("X-Profile-Id") or request.query.get("profile_id")
+    telegram_id, full_name, explicit_user_id = get_authenticated_user_id(init_data, profile_id)
 
-    if not telegram_id:
-        raise web.HTTPUnauthorized(
-            text=json.dumps({"error": "Unauthorized"}),
-            content_type="application/json",
+    if explicit_user_id:
+        from app.database.models.user import User
+        user = await session.get(User, explicit_user_id)
+        if user:
+            return user.id
+
+    if telegram_id:
+        user = await ensure_user_exists(
+            session=session,
+            telegram_id=telegram_id,
+            name=full_name or f"User {telegram_id}",
         )
+        return user.id
 
-    user = await ensure_user_exists(
-        session=session,
-        telegram_id=telegram_id,
-        name=full_name or f"User {telegram_id}",
+    raise web.HTTPUnauthorized(
+        text=json.dumps({"error": "Unauthorized"}),
+        content_type="application/json",
     )
-    return user.id
+
+
+async def handle_get_users(request: web.Request) -> web.Response:
+    """GET /api/users - List all available user profiles."""
+    async with async_session_factory() as session:
+        current_user_id = await get_current_user(request, session)
+        users = await get_all_users(session)
+        return json_response({
+            "current_user_id": current_user_id,
+            "users": [
+                {
+                    "id": u.id,
+                    "name": u.name,
+                    "telegram_id": u.telegram_id,
+                }
+                for u in users
+            ],
+        })
+
+
+async def handle_create_user_profile(request: web.Request) -> web.Response:
+    """POST /api/users/create - Create a new independent user profile."""
+    try:
+        body = await request.json()
+        name = str(body.get("name", "")).strip()
+    except Exception:
+        name = ""
+
+    async with async_session_factory() as session:
+        user = await create_extra_profile(session, name or "Новый профиль")
+        await session.commit()
+        return json_response({
+            "id": user.id,
+            "name": user.name,
+            "telegram_id": user.telegram_id,
+        }, 201)
 
 
 async def handle_summary(request: web.Request) -> web.Response:
@@ -108,7 +152,12 @@ async def handle_summary(request: web.Request) -> web.Response:
             for tx in recent_txs
         ]
 
+        from app.database.models.user import User
+        user_obj = await session.get(User, user_id)
+
         data = {
+            "user_id": user_id,
+            "user_name": user_obj.name if user_obj else f"User #{user_id}",
             "available_funds": summary["available_funds"],
             "savings_balance": summary["savings_balance"],
             "debts_given": summary["debts_given"],
@@ -305,18 +354,20 @@ async def handle_delete_transaction(request: web.Request) -> web.Response:
 
 
 async def handle_get_savings(request: web.Request) -> web.Response:
-    """GET /api/savings - Goals and balance overview."""
+    """GET /api/savings - Goals, balance overview, and financial stress load analysis."""
     async with async_session_factory() as session:
         user_id = await get_current_user(request, session)
         sav_service = SavingsService(session)
         overview = await sav_service.get_multi_goals_overview(user_id)
         history = await sav_service.get_savings_history(user_id, limit=10)
+        load_analysis = await sav_service.get_financial_load_analysis(user_id)
 
         goals = [
             {
                 "id": g["goal"].id,
                 "name": g["goal"].name,
                 "target_amount": g["target"],
+                "target_date": g["goal"].target_date.isoformat() if g["goal"].target_date else None,
                 "is_funded": g["is_funded"],
                 "pct": g["pct"],
             }
@@ -340,6 +391,7 @@ async def handle_get_savings(request: web.Request) -> web.Response:
             "overall_pct": overview["overall_pct"],
             "goals": goals,
             "history": txs,
+            "load_analysis": load_analysis,
         })
 
 
@@ -406,6 +458,8 @@ async def handle_create_goal(request: web.Request) -> web.Response:
         body = await request.json()
         name = str(body["name"]).strip()
         target_amount = Decimal(str(body["target_amount"]))
+        raw_date = body.get("target_date")
+        target_date = date.fromisoformat(str(raw_date)) if raw_date and str(raw_date).strip() else None
     except (KeyError, ValueError, TypeError) as e:
         return json_response({"error": f"Неверные данные: {e}"}, 400)
 
@@ -415,12 +469,13 @@ async def handle_create_goal(request: web.Request) -> web.Response:
     async with async_session_factory() as session:
         user_id = await get_current_user(request, session)
         sav_service = SavingsService(session)
-        goal = await sav_service.create_goal(user_id, name, target_amount)
+        goal = await sav_service.create_goal(user_id, name, target_amount, target_date)
         await session.commit()
         return json_response({
             "id": goal.id,
             "name": goal.name,
             "target_amount": goal.target_amount,
+            "target_date": goal.target_date.isoformat() if goal.target_date else None,
         }, 201)
 
 
@@ -439,6 +494,34 @@ async def handle_delete_goal(request: web.Request) -> web.Response:
             await session.commit()
             return json_response({"success": True})
         return json_response({"error": "Цель не найдена"}, 404)
+
+
+async def handle_get_load_analysis(request: web.Request) -> web.Response:
+    """GET /api/savings/load-analysis"""
+    async with async_session_factory() as session:
+        user_id = await get_current_user(request, session)
+        sav_service = SavingsService(session)
+        analysis = await sav_service.get_financial_load_analysis(user_id)
+        return json_response(analysis)
+
+
+async def handle_update_salary(request: web.Request) -> web.Response:
+    """POST /api/user/salary"""
+    try:
+        body = await request.json()
+        raw_salary = body.get("monthly_salary")
+        monthly_salary = Decimal(str(raw_salary)) if raw_salary is not None and str(raw_salary).strip() != "" else None
+        pay_cycle_days = int(body.get("pay_cycle_days", 30))
+    except (KeyError, ValueError, TypeError) as e:
+        return json_response({"error": f"Неверные данные: {e}"}, 400)
+
+    async with async_session_factory() as session:
+        user_id = await get_current_user(request, session)
+        await update_user_salary(session, user_id, monthly_salary, pay_cycle_days)
+        await session.commit()
+        sav_service = SavingsService(session)
+        analysis = await sav_service.get_financial_load_analysis(user_id)
+        return json_response(analysis)
 
 
 async def handle_get_debts(request: web.Request) -> web.Response:
