@@ -1,9 +1,10 @@
 """Inline keyboard builders for all bot screens."""
 
 from decimal import Decimal
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from app.core.config import settings
 from app.database.models.account import Account
 from app.database.models.category import Category
 from app.database.models.debt import Debt
@@ -27,6 +28,16 @@ def format_amount(amount: int | float | Decimal) -> str:
 def main_menu_keyboard() -> InlineKeyboardMarkup:
     """Main menu shown after /start."""
     builder = InlineKeyboardBuilder()
+
+    # Add Telegram Mini App launch button if webapp_url is configured
+    if settings.webapp_url:
+        builder.row(
+            InlineKeyboardButton(
+                text="📱 Открыть приложение",
+                web_app=WebAppInfo(url=settings.webapp_url),
+            )
+        )
+
     builder.row(
         InlineKeyboardButton(text="💰 Доход", callback_data="menu:income"),
         InlineKeyboardButton(text="💸 Расход", callback_data="menu:expense"),

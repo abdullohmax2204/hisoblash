@@ -27,6 +27,10 @@ class Settings:
     currency_code: str = "UZS"
     currency_symbol: str = "сум"
 
+    # Web / Mini App settings
+    webapp_url: str = ""
+    web_port: int = 8080
+
     @property
     def is_development(self) -> bool:
         return self.environment == "development"
@@ -65,6 +69,12 @@ def load_settings() -> Settings:
     database_url = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./data/finance.db")
     environment = os.getenv("ENVIRONMENT", "development")
     log_level = os.getenv("LOG_LEVEL", "INFO")
+    webapp_url = os.getenv("WEBAPP_URL", "")
+    if not webapp_url:
+        render_url = os.getenv("RENDER_EXTERNAL_URL") or os.getenv("APP_URL", "")
+        if render_url:
+            webapp_url = render_url if render_url.startswith("http") else f"https://{render_url}"
+    web_port = int(os.getenv("PORT", os.getenv("WEB_PORT", "8080")))
     base_dir = Path(__file__).resolve().parent.parent.parent
 
     return Settings(
@@ -74,6 +84,8 @@ def load_settings() -> Settings:
         environment=environment,
         log_level=log_level,
         base_dir=base_dir,
+        webapp_url=webapp_url,
+        web_port=web_port,
     )
 
 

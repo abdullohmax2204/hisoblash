@@ -18,6 +18,8 @@ from app.core.logging_config import setup_logging
 from app.database import init_db, close_db
 from app.bot.middlewares.auth import AuthMiddleware
 from app.bot.middlewares.db import DatabaseMiddleware
+from app.web.server import start_web_server
+from aiogram.types import MenuButtonWebApp, WebAppInfo
 
 # Import all routers
 from app.bot.handlers import (
@@ -49,29 +51,11 @@ async def keep_alive_task(url: str, interval_seconds: int = 480) -> None:
             await asyncio.sleep(interval_seconds)
 
 
-async def start_healthcheck_server(port: int) -> web.AppRunner:
-    """Start lightweight HTTP server for cloud platform (Render/Koyeb) health checks."""
-    app = web.Application()
-
-    async def handle_health(request: web.Request) -> web.Response:
-        return web.Response(text="Hisoblash Bot is Running OK!", status=200)
-
-    app.router.add_get("/", handle_health)
-    app.router.add_get("/health", handle_health)
-
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", port)
-    await site.start()
-    logger.info("Healthcheck web server started on 0.0.0.0:%d", port)
-    return runner
-
-
 async def main() -> None:
-    """Initialize and start the bot."""
+    """Initialize and start the bot and Mini App web server."""
     # Setup logging
     setup_logging(settings.log_level, settings.logs_dir)
-    logger.info("Starting Hisoblash Bot (env=%s)", settings.environment)
+    logger.info("Starting Hisoblash Bot & Mini App (env=%s, port=%d)", settings.environment, settings.web_port)
 
     # Initialize database
     await init_db()
@@ -119,18 +103,29 @@ async def main() -> None:
             pass
         return True
 
+    # Start Mini App Web Server (Serves SPA frontend + REST API + Healthcheck)
     web_runner = None
-    port_env = os.getenv("PORT")
-    if port_env:
+    try:
+        web_runner = await start_web_server(port=settings.web_port)
+    except Exception as e:
+        logger.warning("Failed to start WebApp server on port %d: %s", settings.web_port, e)
+
+    # Configure Telegram Menu Button for WebApp if URL is provided
+    if settings.webapp_url:
         try:
-            port = int(port_env)
-            web_runner = await start_healthcheck_server(port)
+            await bot.set_chat_menu_button(
+                menu_button=MenuButtonWebApp(
+                    text="📱 Приложение",
+                    web_app=WebAppInfo(url=settings.webapp_url),
+                )
+            )
+            logger.info("Chat menu button set to WebApp: %s", settings.webapp_url)
         except Exception as e:
-            logger.warning("Failed to start healthcheck server on port %s: %s", port_env, e)
+            logger.warning("Failed to set chat menu button: %s", e)
 
     # Automatic self-ping to prevent free instances from sleeping
     keep_alive_handle = None
-    app_url = os.getenv("RENDER_EXTERNAL_URL") or os.getenv("APP_URL")
+    app_url = os.getenv("RENDER_EXTERNAL_URL") or os.getenv("APP_URL") or (settings.webapp_url if settings.webapp_url.startswith("http") else None)
     if app_url:
         if not app_url.startswith("http"):
             app_url = f"https://{app_url}"
