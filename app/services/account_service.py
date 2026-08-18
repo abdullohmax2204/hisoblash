@@ -52,9 +52,13 @@ class AccountService:
 
     async def create_account(self, user_id: int, name: str, icon: str = "💳", initial_balance: Decimal = Decimal("0")) -> Account:
         """Create new regular account."""
+        clean_name = name[:40].strip()
+        if not clean_name:
+            raise ValueError("Название счёта не может быть пустым")
+
         account = Account(
             user_id=user_id,
-            name=name,
+            name=clean_name,
             icon=icon,
             balance=initial_balance,
             is_savings=False,

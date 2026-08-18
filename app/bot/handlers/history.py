@@ -2,6 +2,7 @@
 
 from datetime import datetime, date
 from decimal import Decimal
+import html
 import logging
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
@@ -104,7 +105,7 @@ async def render_history_page(callback: CallbackQuery, session: AsyncSession, pa
             icon = "🔄"
             name = "Перевод"
 
-        desc_part = f" <i>«{tx.description}»</i>" if tx.description else ""
+        desc_part = f" <i>«{html.escape(tx.description)}»</i>" if tx.description else ""
         lines.append(f"  • {icon} {name}: <b>{sign}{format_amount(tx.amount)}</b>{desc_part}")
 
     lines.append("\n<i>Нажмите на кнопку ниже для деталей или удаления:</i>")
@@ -152,8 +153,8 @@ async def view_transaction_detail(
     }
 
     date_str = tx.created_at.strftime("%d.%m.%Y в %H:%M")
-    cat_str = f"{tx.category.icon} {tx.category.name}" if tx.category else "—"
-    acc_str = f"{tx.account.icon} {tx.account.name}" if tx.account else "—"
+    cat_str = f"{tx.category.icon} {html.escape(tx.category.name)}" if tx.category else "—"
+    acc_str = f"{tx.account.icon} {html.escape(tx.account.name)}" if tx.account else "—"
 
     lines = [
         "📜 <b>Детали операции</b>\n",
@@ -165,7 +166,7 @@ async def view_transaction_detail(
     ]
 
     if tx.description:
-        lines.append(f"<b>Примечание:</b> <i>{tx.description}</i>")
+        lines.append(f"<b>Примечание:</b> <i>{html.escape(tx.description)}</i>")
 
     await callback.message.edit_text(
         "\n".join(lines),

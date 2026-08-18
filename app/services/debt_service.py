@@ -41,9 +41,13 @@ class DebtService:
 
         account.balance -= amount
 
+        clean_person = person_name[:40].strip()
+        if not clean_person:
+            raise ValueError("Имя человека не может быть пустым")
+
         debt = Debt(
             user_id=user_id,
-            person_name=person_name.strip(),
+            person_name=clean_person,
             type=DebtType.GIVEN.value,
             original_amount=amount,
             remaining_amount=amount,
@@ -58,7 +62,7 @@ class DebtService:
             debt_id=debt.id,
             type=TransactionType.DEBT_GIVEN.value,
             amount=amount,
-            description=f"Дал в долг: {person_name}",
+            description=f"Дал в долг: {clean_person}",
         )
         self.session.add(tx)
         await self.session.flush()
@@ -86,9 +90,13 @@ class DebtService:
 
         account.balance += amount
 
+        clean_person = person_name[:40].strip()
+        if not clean_person:
+            raise ValueError("Имя человека не может быть пустым")
+
         debt = Debt(
             user_id=user_id,
-            person_name=person_name.strip(),
+            person_name=clean_person,
             type=DebtType.TAKEN.value,
             original_amount=amount,
             remaining_amount=amount,

@@ -13,6 +13,9 @@ from app.database.models.transaction import Transaction, TransactionType
 logger = logging.getLogger(__name__)
 
 
+MAX_AMOUNT = Decimal("1000000000000")  # 1 Trillion UZS limit per transaction
+
+
 class FinanceService:
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -31,10 +34,14 @@ class FinanceService:
         """
         if amount <= Decimal("0"):
             raise ValueError("Сумма должна быть больше нуля")
+        if amount > MAX_AMOUNT:
+            raise ValueError("Сумма слишком велика (максимум 1 000 000 000 000 сум)")
 
         account = await self.session.get(Account, account_id)
         if not account or account.user_id != user_id:
             raise ValueError("Счет не найден")
+
+        clean_desc = description[:200].strip() if description else None
 
         tx = Transaction(
             user_id=user_id,
@@ -42,7 +49,7 @@ class FinanceService:
             category_id=category_id,
             type=TransactionType.INCOME.value,
             amount=amount,
-            description=description,
+            description=clean_desc,
         )
         self.session.add(tx)
 
@@ -66,6 +73,8 @@ class FinanceService:
         """
         if amount <= Decimal("0"):
             raise ValueError("Сумма должна быть больше нуля")
+        if amount > MAX_AMOUNT:
+            raise ValueError("Сумма слишком велика (максимум 1 000 000 000 000 сум)")
 
         account = await self.session.get(Account, account_id)
         if not account or account.user_id != user_id:
@@ -74,13 +83,15 @@ class FinanceService:
         if account.balance < amount:
             raise ValueError(f"Недостаточно средств на счете {account.name}. Доступно: {account.balance:,.0f} сум".replace(",", " "))
 
+        clean_desc = description[:200].strip() if description else None
+
         tx = Transaction(
             user_id=user_id,
             account_id=account.id,
             category_id=category_id,
             type=TransactionType.EXPENSE.value,
             amount=amount,
-            description=description,
+            description=clean_desc,
         )
         self.session.add(tx)
 
@@ -103,6 +114,8 @@ class FinanceService:
         """
         if amount <= Decimal("0"):
             raise ValueError("Сумма должна быть больше нуля")
+        if amount > MAX_AMOUNT:
+            raise ValueError("Сумма слишком велика (максимум 1 000 000 000 000 сум)")
         if from_account_id == to_account_id:
             raise ValueError("Нельзя перевести на тот же счет")
 

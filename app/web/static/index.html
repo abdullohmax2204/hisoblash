@@ -291,7 +291,7 @@
         <form id="formIncome" onsubmit="submitIncome(event)">
           <div class="form-group">
             <label>Сумма (сум)</label>
-            <input type="number" id="incomeAmount" class="form-input" placeholder="0" required min="1" step="any">
+            <input type="number" id="incomeAmount" class="form-input" placeholder="0" required min="1" max="1000000000000" step="any">
             <div class="quick-chips">
               <button type="button" onclick="addAmount('incomeAmount', 50000)">+50k</button>
               <button type="button" onclick="addAmount('incomeAmount', 100000)">+100k</button>
@@ -312,7 +312,7 @@
 
           <div class="form-group">
             <label>Комментарий (опционально)</label>
-            <input type="text" id="incomeDesc" class="form-input" placeholder="Например: Зарплата, Аванс...">
+            <input type="text" id="incomeDesc" class="form-input" placeholder="Например: Зарплата, Аванс..." maxlength="200">
           </div>
 
           <button type="submit" class="btn-submit btn-green">Добавить доход</button>
@@ -330,7 +330,7 @@
         <form id="formExpense" onsubmit="submitExpense(event)">
           <div class="form-group">
             <label>Сумма (сум)</label>
-            <input type="number" id="expenseAmount" class="form-input" placeholder="0" required min="1" step="any">
+            <input type="number" id="expenseAmount" class="form-input" placeholder="0" required min="1" max="1000000000000" step="any">
             <div class="quick-chips">
               <button type="button" onclick="addAmount('expenseAmount', 10000)">+10k</button>
               <button type="button" onclick="addAmount('expenseAmount', 25000)">+25k</button>
@@ -351,7 +351,7 @@
 
           <div class="form-group">
             <label>Комментарий (опционально)</label>
-            <input type="text" id="expenseDesc" class="form-input" placeholder="Например: Продукты, Такси...">
+            <input type="text" id="expenseDesc" class="form-input" placeholder="Например: Продукты, Такси..." maxlength="200">
           </div>
 
           <button type="submit" class="btn-submit btn-red">Записать расход</button>
@@ -369,7 +369,7 @@
         <form id="formTransfer" onsubmit="submitTransfer(event)">
           <div class="form-group">
             <label>Сумма перевода (сум)</label>
-            <input type="number" id="transferAmount" class="form-input" placeholder="0" required min="1">
+            <input type="number" id="transferAmount" class="form-input" placeholder="0" required min="1" max="1000000000000">
           </div>
 
           <div class="form-group">
@@ -397,7 +397,7 @@
         <form id="formSaveDeposit" onsubmit="submitSaveDeposit(event)">
           <div class="form-group">
             <label>Сумма (сум)</label>
-            <input type="number" id="saveDepositAmount" class="form-input" placeholder="0" required min="1">
+            <input type="number" id="saveDepositAmount" class="form-input" placeholder="0" required min="1" max="1000000000000">
             <div class="quick-chips">
               <button type="button" onclick="addAmount('saveDepositAmount', 50000)">+50k</button>
               <button type="button" onclick="addAmount('saveDepositAmount', 100000)">+100k</button>
@@ -412,7 +412,7 @@
 
           <div class="form-group">
             <label>Комментарий</label>
-            <input type="text" id="saveDepositDesc" class="form-input" placeholder="Например: В копилку...">
+            <input type="text" id="saveDepositDesc" class="form-input" placeholder="Например: В копилку..." maxlength="200">
           </div>
 
           <button type="submit" class="btn-submit btn-amber">Отложить</button>
@@ -430,7 +430,7 @@
         <form id="formSaveWithdraw" onsubmit="submitSaveWithdraw(event)">
           <div class="form-group">
             <label>Сумма снятия (сум)</label>
-            <input type="number" id="saveWithdrawAmount" class="form-input" placeholder="0" required min="1">
+            <input type="number" id="saveWithdrawAmount" class="form-input" placeholder="0" required min="1" max="1000000000000">
           </div>
 
           <div class="form-group">
@@ -440,7 +440,7 @@
 
           <div class="form-group">
             <label>Причина / Комментарий</label>
-            <input type="text" id="saveWithdrawDesc" class="form-input" placeholder="Например: Покупка...">
+            <input type="text" id="saveWithdrawDesc" class="form-input" placeholder="Например: Покупка..." maxlength="200">
           </div>
 
           <button type="submit" class="btn-submit btn-amber">Снять деньги</button>
@@ -458,7 +458,7 @@
         <form id="formNewAccount" onsubmit="submitNewAccount(event)">
           <div class="form-group">
             <label>Название счёта</label>
-            <input type="text" id="newAccountName" class="form-input" placeholder="Например: Капиталбанк, Наличные..." required>
+            <input type="text" id="newAccountName" class="form-input" placeholder="Например: Капиталбанк, Наличные..." required maxlength="40">
           </div>
 
           <div class="form-group">
@@ -473,7 +473,7 @@
 
           <div class="form-group">
             <label>Начальный баланс (сум)</label>
-            <input type="number" id="newAccountBalance" class="form-input" placeholder="0" min="0">
+            <input type="number" id="newAccountBalance" class="form-input" placeholder="0" min="0" max="1000000000000">
           </div>
 
           <button type="submit" class="btn-submit btn-green">Создать счёт</button>
@@ -491,12 +491,12 @@
         <form id="formNewGoal" onsubmit="submitNewGoal(event)">
           <div class="form-group">
             <label>Название цели</label>
-            <input type="text" id="newGoalName" class="form-input" placeholder="Например: Новый ноутбук, Отпуск..." required>
+            <input type="text" id="newGoalName" class="form-input" placeholder="Например: Новый ноутбук, Отпуск..." required maxlength="40">
           </div>
 
           <div class="form-group">
             <label>Необходимая сумма (сум)</label>
-            <input type="number" id="newGoalTarget" class="form-input" placeholder="0" required min="1">
+            <input type="number" id="newGoalTarget" class="form-input" placeholder="0" required min="1" max="1000000000000">
           </div>
 
           <button type="submit" class="btn-submit btn-accent">Создать цель</button>
@@ -517,12 +517,12 @@
 
           <div class="form-group" id="debtPersonGroup">
             <label>Имя человека</label>
-            <input type="text" id="debtPersonName" class="form-input" placeholder="Имя или контакт">
+            <input type="text" id="debtPersonName" class="form-input" placeholder="Имя или контакт" maxlength="40">
           </div>
 
           <div class="form-group">
             <label id="debtAmountLabel">Сумма (сум)</label>
-            <input type="number" id="debtAmount" class="form-input" placeholder="0" required min="1">
+            <input type="number" id="debtAmount" class="form-input" placeholder="0" required min="1" max="1000000000000">
           </div>
 
           <div class="form-group">

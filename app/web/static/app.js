@@ -511,155 +511,179 @@ function loadHistoryPage(direction) {
 
 // ==================== FORM SUBMISSIONS ====================
 
-async function submitIncome(e) {
+async function handleFormSubmit(e, asyncCallback) {
   e.preventDefault();
+  const form = e.target;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  if (submitBtn) {
+    if (submitBtn.disabled) return;
+    submitBtn.disabled = true;
+    submitBtn.dataset.origText = submitBtn.textContent;
+    submitBtn.textContent = 'Обработка...';
+  }
   haptic('medium');
-  const amount = document.getElementById('incomeAmount').value;
-  const account_id = document.getElementById('incomeAccount').value;
-  const category_id = document.getElementById('incomeCategory').value;
-  const description = document.getElementById('incomeDesc').value;
 
   try {
-    await apiFetch('/api/transactions/income', {
-      method: 'POST',
-      body: JSON.stringify({ amount, account_id, category_id, description }),
-    });
-    closeModal('modalIncome');
-    document.getElementById('formIncome').reset();
-    showToast('Доход успешно добавлен!');
-    await loadSummary();
-  } catch (err) {
-    showToast(err.message, 'error');
+    await asyncCallback();
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      if (submitBtn.dataset.origText) {
+        submitBtn.textContent = submitBtn.dataset.origText;
+      }
+    }
   }
+}
+
+async function submitIncome(e) {
+  await handleFormSubmit(e, async () => {
+    const amount = document.getElementById('incomeAmount').value;
+    const account_id = document.getElementById('incomeAccount').value;
+    const category_id = document.getElementById('incomeCategory').value;
+    const description = document.getElementById('incomeDesc').value;
+
+    try {
+      await apiFetch('/api/transactions/income', {
+        method: 'POST',
+        body: JSON.stringify({ amount, account_id, category_id, description }),
+      });
+      closeModal('modalIncome');
+      document.getElementById('formIncome').reset();
+      showToast('Доход успешно добавлен!');
+      await loadSummary();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  });
 }
 
 async function submitExpense(e) {
-  e.preventDefault();
-  haptic('medium');
-  const amount = document.getElementById('expenseAmount').value;
-  const account_id = document.getElementById('expenseAccount').value;
-  const category_id = document.getElementById('expenseCategory').value;
-  const description = document.getElementById('expenseDesc').value;
+  await handleFormSubmit(e, async () => {
+    const amount = document.getElementById('expenseAmount').value;
+    const account_id = document.getElementById('expenseAccount').value;
+    const category_id = document.getElementById('expenseCategory').value;
+    const description = document.getElementById('expenseDesc').value;
 
-  try {
-    await apiFetch('/api/transactions/expense', {
-      method: 'POST',
-      body: JSON.stringify({ amount, account_id, category_id, description }),
-    });
-    closeModal('modalExpense');
-    document.getElementById('formExpense').reset();
-    showToast('Расход записан!');
-    await loadSummary();
-  } catch (err) {
-    showToast(err.message, 'error');
-  }
+    try {
+      await apiFetch('/api/transactions/expense', {
+        method: 'POST',
+        body: JSON.stringify({ amount, account_id, category_id, description }),
+      });
+      closeModal('modalExpense');
+      document.getElementById('formExpense').reset();
+      showToast('Расход записан!');
+      await loadSummary();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  });
 }
 
 async function submitTransfer(e) {
-  e.preventDefault();
-  haptic('medium');
-  const amount = document.getElementById('transferAmount').value;
-  const from_account_id = document.getElementById('transferFromAccount').value;
-  const to_account_id = document.getElementById('transferToAccount').value;
+  await handleFormSubmit(e, async () => {
+    const amount = document.getElementById('transferAmount').value;
+    const from_account_id = document.getElementById('transferFromAccount').value;
+    const to_account_id = document.getElementById('transferToAccount').value;
 
-  try {
-    await apiFetch('/api/transactions/transfer', {
-      method: 'POST',
-      body: JSON.stringify({ amount, from_account_id, to_account_id }),
-    });
-    closeModal('modalTransfer');
-    document.getElementById('formTransfer').reset();
-    showToast('Перевод успешно выполнен!');
-    await loadSummary();
-  } catch (err) {
-    showToast(err.message, 'error');
-  }
+    try {
+      await apiFetch('/api/transactions/transfer', {
+        method: 'POST',
+        body: JSON.stringify({ amount, from_account_id, to_account_id }),
+      });
+      closeModal('modalTransfer');
+      document.getElementById('formTransfer').reset();
+      showToast('Перевод успешно выполнен!');
+      await loadSummary();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  });
 }
 
 async function submitSaveDeposit(e) {
-  e.preventDefault();
-  haptic('medium');
-  const amount = document.getElementById('saveDepositAmount').value;
-  const source_account_id = document.getElementById('saveDepositSource').value;
-  const description = document.getElementById('saveDepositDesc').value;
+  await handleFormSubmit(e, async () => {
+    const amount = document.getElementById('saveDepositAmount').value;
+    const source_account_id = document.getElementById('saveDepositSource').value;
+    const description = document.getElementById('saveDepositDesc').value;
 
-  try {
-    const res = await apiFetch('/api/savings/deposit', {
-      method: 'POST',
-      body: JSON.stringify({ amount, source_account_id, description }),
-    });
-    closeModal('modalSaveDeposit');
-    document.getElementById('formSaveDeposit').reset();
-    showToast('Отложено в накопления!');
-    if (res.reached_goals && res.reached_goals.length) {
-      showToast(`🎉 Достигнута цель: ${res.reached_goals.join(', ')}!`, 'success');
+    try {
+      const res = await apiFetch('/api/savings/deposit', {
+        method: 'POST',
+        body: JSON.stringify({ amount, source_account_id, description }),
+      });
+      closeModal('modalSaveDeposit');
+      document.getElementById('formSaveDeposit').reset();
+      showToast('Отложено в накопления!');
+      if (res.reached_goals && res.reached_goals.length) {
+        showToast(`🎉 Достигнута цель: ${res.reached_goals.join(', ')}!`, 'success');
+      }
+      await loadSummary();
+    } catch (err) {
+      showToast(err.message, 'error');
     }
-    await loadSummary();
-  } catch (err) {
-    showToast(err.message, 'error');
-  }
+  });
 }
 
 async function submitSaveWithdraw(e) {
-  e.preventDefault();
-  haptic('medium');
-  const amount = document.getElementById('saveWithdrawAmount').value;
-  const dest_account_id = document.getElementById('saveWithdrawDest').value;
-  const description = document.getElementById('saveWithdrawDesc').value;
+  await handleFormSubmit(e, async () => {
+    const amount = document.getElementById('saveWithdrawAmount').value;
+    const dest_account_id = document.getElementById('saveWithdrawDest').value;
+    const description = document.getElementById('saveWithdrawDesc').value;
 
-  try {
-    await apiFetch('/api/savings/withdraw', {
-      method: 'POST',
-      body: JSON.stringify({ amount, dest_account_id, description }),
-    });
-    closeModal('modalSaveWithdraw');
-    document.getElementById('formSaveWithdraw').reset();
-    showToast('Деньги выведены из накоплений');
-    await loadSummary();
-  } catch (err) {
-    showToast(err.message, 'error');
-  }
+    try {
+      await apiFetch('/api/savings/withdraw', {
+        method: 'POST',
+        body: JSON.stringify({ amount, dest_account_id, description }),
+      });
+      closeModal('modalSaveWithdraw');
+      document.getElementById('formSaveWithdraw').reset();
+      showToast('Деньги выведены из накоплений');
+      await loadSummary();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  });
 }
 
 async function submitNewAccount(e) {
-  e.preventDefault();
-  haptic('medium');
-  const name = document.getElementById('newAccountName').value;
-  const icon = document.querySelector('input[name="accIcon"]:checked')?.value || '💳';
-  const initial_balance = document.getElementById('newAccountBalance').value || 0;
+  await handleFormSubmit(e, async () => {
+    const name = document.getElementById('newAccountName').value;
+    const icon = document.querySelector('input[name="accIcon"]:checked')?.value || '💳';
+    const initial_balance = document.getElementById('newAccountBalance').value || 0;
 
-  try {
-    await apiFetch('/api/accounts', {
-      method: 'POST',
-      body: JSON.stringify({ name, icon, initial_balance }),
-    });
-    closeModal('modalNewAccount');
-    document.getElementById('formNewAccount').reset();
-    showToast('Новый счёт создан!');
-    await loadSummary();
-  } catch (err) {
-    showToast(err.message, 'error');
-  }
+    try {
+      await apiFetch('/api/accounts', {
+        method: 'POST',
+        body: JSON.stringify({ name, icon, initial_balance }),
+      });
+      closeModal('modalNewAccount');
+      document.getElementById('formNewAccount').reset();
+      showToast('Новый счёт создан!');
+      await loadSummary();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  });
 }
 
 async function submitNewGoal(e) {
-  e.preventDefault();
-  haptic('medium');
-  const name = document.getElementById('newGoalName').value;
-  const target_amount = document.getElementById('newGoalTarget').value;
+  await handleFormSubmit(e, async () => {
+    const name = document.getElementById('newGoalName').value;
+    const target_amount = document.getElementById('newGoalTarget').value;
 
-  try {
-    await apiFetch('/api/savings/goals', {
-      method: 'POST',
-      body: JSON.stringify({ name, target_amount }),
-    });
-    closeModal('modalNewGoal');
-    document.getElementById('formNewGoal').reset();
-    showToast('Новая цель создана!');
-    await loadSummary();
-  } catch (err) {
-    showToast(err.message, 'error');
-  }
+    try {
+      await apiFetch('/api/savings/goals', {
+        method: 'POST',
+        body: JSON.stringify({ name, target_amount }),
+      });
+      closeModal('modalNewGoal');
+      document.getElementById('formNewGoal').reset();
+      showToast('Новая цель создана!');
+      await loadSummary();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  });
 }
 
 async function deleteGoal(goalId) {
@@ -721,40 +745,40 @@ function openReturnDebtModal(debtId, personName, remAmount) {
 }
 
 async function submitDebtForm(e) {
-  e.preventDefault();
-  haptic('medium');
-  const mode = document.getElementById('debtFormMode').value;
-  const amount = document.getElementById('debtAmount').value;
-  const account_id = document.getElementById('debtAccount').value;
-  const person_name = document.getElementById('debtPersonName').value;
-  const debt_id = document.getElementById('debtReturnId').value;
+  await handleFormSubmit(e, async () => {
+    const mode = document.getElementById('debtFormMode').value;
+    const amount = document.getElementById('debtAmount').value;
+    const account_id = document.getElementById('debtAccount').value;
+    const person_name = document.getElementById('debtPersonName').value;
+    const debt_id = document.getElementById('debtReturnId').value;
 
-  try {
-    if (mode === 'give') {
-      await apiFetch('/api/debts/give', {
-        method: 'POST',
-        body: JSON.stringify({ person_name, amount, account_id }),
-      });
-      showToast('Долг записан!');
-    } else if (mode === 'take') {
-      await apiFetch('/api/debts/take', {
-        method: 'POST',
-        body: JSON.stringify({ person_name, amount, account_id }),
-      });
-      showToast('Долг записан!');
-    } else if (mode === 'return') {
-      await apiFetch('/api/debts/return', {
-        method: 'POST',
-        body: JSON.stringify({ debt_id, amount, account_id }),
-      });
-      showToast('Долг успешно погашен!');
+    try {
+      if (mode === 'give') {
+        await apiFetch('/api/debts/give', {
+          method: 'POST',
+          body: JSON.stringify({ person_name, amount, account_id }),
+        });
+        showToast('Долг записан!');
+      } else if (mode === 'take') {
+        await apiFetch('/api/debts/take', {
+          method: 'POST',
+          body: JSON.stringify({ person_name, amount, account_id }),
+        });
+        showToast('Долг записан!');
+      } else if (mode === 'return') {
+        await apiFetch('/api/debts/return', {
+          method: 'POST',
+          body: JSON.stringify({ debt_id, amount, account_id }),
+        });
+        showToast('Долг успешно погашен!');
+      }
+      closeModal('modalDebt');
+      await loadSummary();
+      await loadDebts();
+    } catch (err) {
+      showToast(err.message, 'error');
     }
-    closeModal('modalDebt');
-    await loadSummary();
-    await loadDebts();
-  } catch (err) {
-    showToast(err.message, 'error');
-  }
+  });
 }
 
 // ==================== INITIALIZATION ====================

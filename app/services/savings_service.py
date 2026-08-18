@@ -50,9 +50,13 @@ class SavingsService:
 
     async def create_goal(self, user_id: int, name: str, target_amount: Decimal) -> SavingGoal:
         """Add a new savings goal."""
+        clean_name = name[:40].strip()
+        if not clean_name:
+            raise ValueError("Название цели не может быть пустым")
+
         goal = SavingGoal(
             user_id=user_id,
-            name=name.strip(),
+            name=clean_name,
             target_amount=target_amount,
             is_active=True,
         )
