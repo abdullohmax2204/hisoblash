@@ -175,8 +175,8 @@ async def handle_get_categories(request: web.Request) -> web.Response:
     async with async_session_factory() as session:
         user_id = await get_current_user(request, session)
         cat_service = CategoryService(session)
-        expense_cats = await cat_service.get_categories_by_type(user_id, "expense")
-        income_cats = await cat_service.get_categories_by_type(user_id, "income")
+        expense_cats = await cat_service.get_categories_by_type(user_id, "EXPENSE")
+        income_cats = await cat_service.get_categories_by_type(user_id, "INCOME")
 
         return json_response({
             "expense": [{"id": c.id, "name": c.name, "icon": c.icon} for c in expense_cats],
@@ -184,12 +184,34 @@ async def handle_get_categories(request: web.Request) -> web.Response:
         })
 
 
+async def handle_create_category(request: web.Request) -> web.Response:
+    """POST /api/categories - Create custom category."""
+    try:
+        body = await request.json()
+        name = str(body["name"]).strip()
+        category_type = str(body["type"]).strip().upper()
+        icon = str(body.get("icon", "📁")).strip() or "📁"
+    except (KeyError, ValueError, TypeError) as e:
+        return json_response({"error": f"Неверные данные: {e}"}, 400)
+
+    if not name or category_type not in ("INCOME", "EXPENSE"):
+        return json_response({"error": "Название и правильный тип (INCOME/EXPENSE) обязательны"}, 400)
+
+    async with async_session_factory() as session:
+        user_id = await get_current_user(request, session)
+        cat_service = CategoryService(session)
+        cat = await cat_service.create_category(user_id, name, category_type, icon)
+        await session.commit()
+        return json_response({"id": cat.id, "name": cat.name, "icon": cat.icon, "type": cat.type}, 201)
+
+
 async def handle_add_income(request: web.Request) -> web.Response:
     """POST /api/transactions/income"""
     try:
         body = await request.json()
         account_id = int(body["account_id"])
-        category_id = int(body["category_id"]) if body.get("category_id") else None
+        raw_cat = body.get("category_id")
+        category_id = int(raw_cat) if raw_cat and str(raw_cat).strip().isdigit() else None
         amount = Decimal(str(body["amount"]))
         description = body.get("description")
     except (KeyError, ValueError, TypeError) as e:
@@ -215,7 +237,8 @@ async def handle_add_expense(request: web.Request) -> web.Response:
     try:
         body = await request.json()
         account_id = int(body["account_id"])
-        category_id = int(body["category_id"]) if body.get("category_id") else None
+        raw_cat = body.get("category_id")
+        category_id = int(raw_cat) if raw_cat and str(raw_cat).strip().isdigit() else None
         amount = Decimal(str(body["amount"]))
         description = body.get("description")
     except (KeyError, ValueError, TypeError) as e:

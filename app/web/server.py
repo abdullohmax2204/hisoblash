@@ -51,6 +51,7 @@ def create_web_app() -> web.Application:
     app.router.add_get("/api/accounts", api.handle_get_accounts)
     app.router.add_post("/api/accounts", api.handle_create_account)
     app.router.add_get("/api/categories", api.handle_get_categories)
+    app.router.add_post("/api/categories", api.handle_create_category)
     app.router.add_post("/api/transactions/income", api.handle_add_income)
     app.router.add_post("/api/transactions/expense", api.handle_add_expense)
     app.router.add_post("/api/transactions/transfer", api.handle_transfer)
