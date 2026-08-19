@@ -1407,7 +1407,7 @@ function showConfirmDialog({ title = 'Подтверждение', message = 'В
   if (msgEl) msgEl.textContent = message;
   if (acceptBtn) {
     acceptBtn.textContent = btnText;
-    acceptBtn.className = `btn-submit ${isDanger ? 'btn-red' : 'btn-accent'}`;
+    acceptBtn.className = `confirm-btn ${isDanger ? 'confirm-btn-danger' : 'confirm-btn-accent'}`;
   }
   confirmCallback = onConfirm;
   openModal('modalConfirm');
