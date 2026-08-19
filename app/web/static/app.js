@@ -1346,10 +1346,18 @@ async function submitDebtForm(e) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Sync User Profile
+  // Telegram User Avatar & Name
   if (tg?.initDataUnsafe?.user) {
     const u = tg.initDataUnsafe.user;
-    document.getElementById('userName').textContent = `${u.first_name || ''} ${u.last_name || ''}`.trim() || 'Пользователь';
-    document.getElementById('userAvatar').textContent = (u.first_name || '💰')[0].toUpperCase();
+    const avatarEl = document.getElementById('userAvatar');
+    if (avatarEl) {
+      if (u.photo_url) {
+        avatarEl.innerHTML = `<img src="${u.photo_url}" class="avatar-photo" alt="Avatar" />`;
+      } else {
+        const initial = (u.first_name || 'U')[0].toUpperCase();
+        avatarEl.textContent = initial;
+      }
+    }
   }
 
   // Balance Visibility Toggle
@@ -1359,14 +1367,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderDashboard();
     renderAccountsList();
     renderGoals();
-  });
-
-  // Refresh Button
-  document.getElementById('refreshBtn')?.addEventListener('click', async () => {
-    haptic('medium');
-    await loadSummary();
-    await loadCategories();
-    showToast('Данные обновлены');
   });
 
   // Close modals on backdrop click
@@ -1391,40 +1391,103 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadCategories();
 });
 
-// ==================== PROFILES MANAGEMENT ====================
+// ==================== PROFILES MANAGEMENT (MAX 3) ====================
+
+let userProfilesList = [];
 
 async function loadUserProfiles() {
   try {
     const data = await apiFetch('/api/users');
-    const select = document.getElementById('userProfileSelect');
-    if (!select) return;
-
-    select.innerHTML = '';
+    userProfilesList = data.users || [];
     const currentActive = data.current_user_id;
-
-    data.users.forEach((u) => {
-      const option = document.createElement('option');
-      option.value = u.id;
-      option.textContent = u.name || `Профиль #${u.id}`;
-      if (String(u.id) === String(currentActive)) {
-        option.selected = true;
-      }
-      select.appendChild(option);
-    });
 
     if (!localStorage.getItem('activeProfileId') && currentActive) {
       localStorage.setItem('activeProfileId', currentActive);
     }
+    
+    updateProfilePillUI();
   } catch (err) {
     console.warn('Could not load user profiles:', err);
   }
+}
+
+function updateProfilePillUI() {
+  const nameEl = document.getElementById('currentProfileName');
+  if (!nameEl) return;
+
+  const activeId = localStorage.getItem('activeProfileId');
+  const activeProf = userProfilesList.find(u => String(u.id) === String(activeId)) || userProfilesList[0];
+
+  if (!userProfilesList.length || userProfilesList.length === 1) {
+    nameEl.textContent = 'Основной';
+  } else {
+    const isFirst = userProfilesList[0]?.id === activeProf?.id;
+    nameEl.textContent = isFirst ? 'Основной' : (activeProf?.name || 'Профиль');
+  }
+}
+
+function openProfilePicker() {
+  haptic('medium');
+  const listContainer = document.getElementById('profilePickerList');
+  const addBox = document.getElementById('profilePickerAddBox');
+  if (!listContainer) return;
+
+  const activeId = localStorage.getItem('activeProfileId');
+
+  listContainer.innerHTML = userProfilesList.map((u, idx) => {
+    const isActive = String(u.id) === String(activeId) || (!activeId && idx === 0);
+    const displayName = idx === 0 ? 'Основной' : u.name;
+    const tag = idx === 0 ? 'Главный профиль' : `Профиль #${idx + 1}`;
+
+    return `
+      <div class="profile-item-row ${isActive ? 'active' : ''}" onclick="selectProfileAndClose(${u.id})">
+        <div class="profile-item-left">
+          <div class="profile-item-badge">${idx + 1}</div>
+          <div>
+            <div class="profile-item-name">${displayName}</div>
+            <div class="profile-item-tag">${tag}</div>
+          </div>
+        </div>
+        ${isActive ? '<div class="profile-item-check">✓</div>' : ''}
+      </div>
+    `;
+  }).join('');
+
+  if (addBox) {
+    if (userProfilesList.length < 3) {
+      addBox.innerHTML = `
+        <button class="btn-submit btn-accent" onclick="openNewProfileModal()">
+          + Новый профиль (${userProfilesList.length}/3)
+        </button>
+      `;
+    } else {
+      addBox.innerHTML = `
+        <div style="text-align: center; font-size: 12px; color: var(--text-tertiary); padding: 8px 0;">
+          Достигнут максимум профилей (3/3)
+        </div>
+      `;
+    }
+  }
+
+  openModal('modalProfilePicker');
+}
+
+async function selectProfileAndClose(profileId) {
+  closeModal('modalProfilePicker');
+  await switchUserProfile(profileId);
+}
+
+function openNewProfileModal() {
+  closeModal('modalProfilePicker');
+  openModal('modalNewProfile');
 }
 
 async function switchUserProfile(profileId) {
   if (!profileId) return;
   haptic('medium');
   localStorage.setItem('activeProfileId', profileId);
-  showToast('Переключение профиля...', 'success');
+  updateProfilePillUI();
+  showToast('Переключение профиля...', 'info');
   await loadSummary();
   await loadCategories();
 }
@@ -1434,6 +1497,11 @@ async function submitNewProfile(e) {
   const input = document.getElementById('newProfileName');
   const name = input?.value?.trim();
   if (!name) return;
+
+  if (userProfilesList.length >= 3) {
+    showToast('Достигнут максимум профилей (3/3)', 'error');
+    return;
+  }
 
   try {
     haptic('light');
@@ -1446,9 +1514,9 @@ async function submitNewProfile(e) {
     if (input) input.value = '';
     showToast(`Профиль "${newUser.name}" создан!`, 'success');
     
-    // Switch to new profile
-    await switchUserProfile(newUser.id);
+    // Reload user profiles and switch
     await loadUserProfiles();
+    await switchUserProfile(newUser.id);
   } catch (err) {
     showToast(err.message || 'Ошибка создания профиля', 'error');
   }

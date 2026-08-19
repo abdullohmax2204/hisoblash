@@ -80,7 +80,7 @@ async def handle_get_users(request: web.Request) -> web.Response:
 
 
 async def handle_create_user_profile(request: web.Request) -> web.Response:
-    """POST /api/users/create - Create a new independent user profile."""
+    """POST /api/users/create - Create a new independent user profile (max 3)."""
     try:
         body = await request.json()
         name = str(body.get("name", "")).strip()
@@ -88,7 +88,11 @@ async def handle_create_user_profile(request: web.Request) -> web.Response:
         name = ""
 
     async with async_session_factory() as session:
-        user = await create_extra_profile(session, name or "Новый профиль")
+        users = await get_all_users(session)
+        if len(users) >= 3:
+            return json_response({"error": "Достигнут лимит профилей (максимум 3)"}, 400)
+
+        user = await create_extra_profile(session, name or f"Профиль {len(users) + 1}")
         await session.commit()
         return json_response({
             "id": user.id,
