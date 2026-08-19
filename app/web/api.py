@@ -136,7 +136,7 @@ async def handle_delete_user_profile(request: web.Request) -> web.Response:
         from app.database.models.user import User
         from app.database.models.transaction import Transaction
         from app.database.models.debt import Debt
-        from app.database.models.savings_goal import SavingsGoal
+        from app.database.models.saving_goal import SavingGoal
         from app.database.models.account import Account
         from app.database.models.category import Category
         from sqlalchemy import delete
@@ -152,7 +152,7 @@ async def handle_delete_user_profile(request: web.Request) -> web.Response:
         if user:
             await session.execute(delete(Transaction).where(Transaction.user_id == user_id))
             await session.execute(delete(Debt).where(Debt.user_id == user_id))
-            await session.execute(delete(SavingsGoal).where(SavingsGoal.user_id == user_id))
+            await session.execute(delete(SavingGoal).where(SavingGoal.user_id == user_id))
             await session.execute(delete(Account).where(Account.user_id == user_id))
             await session.execute(delete(Category).where(Category.user_id == user_id))
             await session.delete(user)

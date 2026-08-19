@@ -185,5 +185,17 @@ async def test_web_app_endpoints(session, test_user, test_accounts, test_categor
         new_summary = await resp.json()
         assert new_summary["user_name"] == "Тестовый профиль 2"
 
+        # Rename profile
+        resp = await client.post("/api/users/rename", json={"user_id": new_profile_id, "name": "Работа"})
+        assert resp.status == 200
+        renamed = await resp.json()
+        assert renamed["name"] == "Работа"
+
+        # Delete profile
+        resp = await client.post("/api/users/delete", json={"user_id": new_profile_id})
+        assert resp.status == 200
+        del_res = await resp.json()
+        assert del_res["success"] is True
+
     finally:
         await client.close()
