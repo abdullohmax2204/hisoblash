@@ -1378,8 +1378,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Initialize input formatting masks
+  // Initialize input formatting masks & modals
   initAmountInputListeners();
+  initConfirmModalListeners();
 
   // Initial badge and fullscreen state update
   updateNotificationBadge();
@@ -1394,6 +1395,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ==================== PROFILES MANAGEMENT (MAX 3) ====================
 
 let userProfilesList = [];
+let confirmCallback = null;
+
+function showConfirmDialog({ title = 'Подтверждение', message = 'Вы уверены?', btnText = 'Подтвердить', isDanger = true, onConfirm }) {
+  haptic('warning');
+  const titleEl = document.getElementById('confirmTitle');
+  const msgEl = document.getElementById('confirmMessage');
+  const acceptBtn = document.getElementById('confirmAcceptBtn');
+  
+  if (titleEl) titleEl.textContent = title;
+  if (msgEl) msgEl.textContent = message;
+  if (acceptBtn) {
+    acceptBtn.textContent = btnText;
+    acceptBtn.className = `btn-submit ${isDanger ? 'btn-red' : 'btn-accent'}`;
+  }
+  confirmCallback = onConfirm;
+  openModal('modalConfirm');
+}
+
+function initConfirmModalListeners() {
+  document.getElementById('confirmAcceptBtn')?.addEventListener('click', async () => {
+    haptic('medium');
+    closeModal('modalConfirm');
+    if (typeof confirmCallback === 'function') {
+      const cb = confirmCallback;
+      confirmCallback = null;
+      await cb();
+    }
+  });
+}
 
 async function loadUserProfiles() {
   try {
@@ -1520,34 +1550,37 @@ async function submitRenameProfile(e) {
   }
 }
 
-async function handleDeleteProfileClick(e, userId, name) {
+function handleDeleteProfileClick(e, userId, name) {
   e.stopPropagation();
-  haptic('medium');
-  if (!confirm(`Удалить профиль "${name}"?`)) {
-    return;
-  }
+  showConfirmDialog({
+    title: 'Удалить профиль?',
+    message: `Удалить профиль "${name}"? Все связанные с ним данные и счета будут удалены.`,
+    btnText: 'Удалить',
+    isDanger: true,
+    onConfirm: async () => {
+      try {
+        await apiFetch('/api/users/delete', {
+          method: 'POST',
+          body: JSON.stringify({ user_id: userId })
+        });
+        showToast(`Профиль "${name}" удален`, 'info');
+        
+        // If active was deleted, fallback to first profile
+        const activeId = localStorage.getItem('activeProfileId');
+        if (String(activeId) === String(userId)) {
+          localStorage.removeItem('activeProfileId');
+        }
 
-  try {
-    await apiFetch('/api/users/delete', {
-      method: 'POST',
-      body: JSON.stringify({ user_id: userId })
-    });
-    showToast(`Профиль "${name}" удален`, 'info');
-    
-    // If active was deleted, fallback to first profile
-    const activeId = localStorage.getItem('activeProfileId');
-    if (String(activeId) === String(userId)) {
-      localStorage.removeItem('activeProfileId');
+        await loadUserProfiles();
+        if (userProfilesList.length) {
+          await switchUserProfile(userProfilesList[0].id);
+        }
+        openProfilePicker();
+      } catch (err) {
+        showToast(err.message || 'Ошибка удаления профиля', 'error');
+      }
     }
-
-    await loadUserProfiles();
-    if (userProfilesList.length) {
-      await switchUserProfile(userProfilesList[0].id);
-    }
-    openProfilePicker();
-  } catch (err) {
-    showToast(err.message || 'Ошибка удаления профиля', 'error');
-  }
+  });
 }
 
 async function selectProfileAndClose(profileId) {

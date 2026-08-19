@@ -322,6 +322,35 @@ body {
   width: 100%;
 }
 
+.confirm-icon-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(251, 113, 133, 0.12);
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(251, 113, 133, 0.25);
+  box-shadow: 0 0 20px rgba(251, 113, 133, 0.15);
+}
+
+.btn-cancel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-cancel:active {
+  transform: scale(0.97);
+  background: var(--glass-bg-hover);
+}
+
 .icon-btn {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
