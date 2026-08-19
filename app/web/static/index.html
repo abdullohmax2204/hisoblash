@@ -8,7 +8,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <!-- Chart.js for analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/styles.css?v=4.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -366,25 +366,34 @@
           <button class="close-modal" onclick="closeModal('modalIncome')">✕</button>
         </div>
         <form id="formIncome" onsubmit="submitIncome(event)">
+          <!-- Hero Amount Card -->
+          <div class="hero-amount-box">
+            <div class="hero-amount-label">Сумма дохода</div>
+            <div class="hero-amount-display" id="incomeDisplay">0 <span class="hero-amount-currency">сум</span></div>
+          </div>
+
           <div class="form-group">
-            <label>Сумма (сум)</label>
-            <input type="text" inputmode="numeric" id="incomeAmount" class="form-input amount-input" placeholder="0" required>
+            <label>Ввод суммы</label>
+            <input type="text" inputmode="numeric" id="incomeAmount" class="form-input amount-input" placeholder="0" data-display-id="incomeDisplay" required autocomplete="off">
             <div class="quick-chips">
               <button type="button" onclick="addAmount('incomeAmount', 50000)">+50 000</button>
               <button type="button" onclick="addAmount('incomeAmount', 100000)">+100 000</button>
               <button type="button" onclick="addAmount('incomeAmount', 500000)">+500 000</button>
               <button type="button" onclick="addAmount('incomeAmount', 1000000)">+1 000 000</button>
+              <button type="button" onclick="clearAmount('incomeAmount')">⌫ Очистить</button>
             </div>
           </div>
 
           <div class="form-group">
             <label>Куда зачислить (Счёт)</label>
-            <select id="incomeAccount" class="form-select" required></select>
+            <div class="account-pill-row" id="incomeAccountPills"></div>
+            <input type="hidden" id="incomeAccount" required>
           </div>
 
           <div class="form-group">
             <label>Категория дохода</label>
-            <select id="incomeCategory" class="form-select"></select>
+            <div class="category-chip-grid" id="incomeCategoryChips"></div>
+            <input type="hidden" id="incomeCategory">
           </div>
 
           <div class="form-group">
@@ -405,25 +414,34 @@
           <button class="close-modal" onclick="closeModal('modalExpense')">✕</button>
         </div>
         <form id="formExpense" onsubmit="submitExpense(event)">
+          <!-- Hero Amount Card -->
+          <div class="hero-amount-box">
+            <div class="hero-amount-label">Сумма расхода</div>
+            <div class="hero-amount-display" id="expenseDisplay">0 <span class="hero-amount-currency">сум</span></div>
+          </div>
+
           <div class="form-group">
-            <label>Сумма (сум)</label>
-            <input type="text" inputmode="numeric" id="expenseAmount" class="form-input amount-input" placeholder="0" required>
+            <label>Ввод суммы</label>
+            <input type="text" inputmode="numeric" id="expenseAmount" class="form-input amount-input" placeholder="0" data-display-id="expenseDisplay" required autocomplete="off">
             <div class="quick-chips">
               <button type="button" onclick="addAmount('expenseAmount', 10000)">+10 000</button>
               <button type="button" onclick="addAmount('expenseAmount', 25000)">+25 000</button>
               <button type="button" onclick="addAmount('expenseAmount', 50000)">+50 000</button>
               <button type="button" onclick="addAmount('expenseAmount', 100000)">+100 000</button>
+              <button type="button" onclick="clearAmount('expenseAmount')">⌫ Очистить</button>
             </div>
           </div>
 
           <div class="form-group">
             <label>Списать со счёта</label>
-            <select id="expenseAccount" class="form-select" required></select>
+            <div class="account-pill-row" id="expenseAccountPills"></div>
+            <input type="hidden" id="expenseAccount" required>
           </div>
 
           <div class="form-group">
             <label>Категория расхода</label>
-            <select id="expenseCategory" class="form-select" required></select>
+            <div class="category-chip-grid" id="expenseCategoryChips"></div>
+            <input type="hidden" id="expenseCategory" required>
           </div>
 
           <div class="form-group">
@@ -444,19 +462,26 @@
           <button class="close-modal" onclick="closeModal('modalTransfer')">✕</button>
         </div>
         <form id="formTransfer" onsubmit="submitTransfer(event)">
+          <div class="hero-amount-box">
+            <div class="hero-amount-label">Сумма перевода</div>
+            <div class="hero-amount-display" id="transferDisplay">0 <span class="hero-amount-currency">сум</span></div>
+          </div>
+
           <div class="form-group">
             <label>Сумма перевода (сум)</label>
-            <input type="text" inputmode="numeric" id="transferAmount" class="form-input amount-input" placeholder="0" required>
+            <input type="text" inputmode="numeric" id="transferAmount" class="form-input amount-input" placeholder="0" data-display-id="transferDisplay" required autocomplete="off">
           </div>
 
           <div class="form-group">
             <label>Откуда списать</label>
-            <select id="transferFromAccount" class="form-select" required></select>
+            <div class="account-pill-row" id="transferFromAccountPills"></div>
+            <input type="hidden" id="transferFromAccount" required>
           </div>
 
           <div class="form-group">
             <label>Куда перевести</label>
-            <select id="transferToAccount" class="form-select" required></select>
+            <div class="account-pill-row" id="transferToAccountPills"></div>
+            <input type="hidden" id="transferToAccount" required>
           </div>
 
           <button type="submit" class="btn-submit btn-blue">Перевести</button>
@@ -472,19 +497,26 @@
           <button class="close-modal" onclick="closeModal('modalSaveDeposit')">✕</button>
         </div>
         <form id="formSaveDeposit" onsubmit="submitSaveDeposit(event)">
+          <div class="hero-amount-box">
+            <div class="hero-amount-label">Сумма в накопления</div>
+            <div class="hero-amount-display" id="saveDepositDisplay">0 <span class="hero-amount-currency">сум</span></div>
+          </div>
+
           <div class="form-group">
             <label>Сумма (сум)</label>
-            <input type="text" inputmode="numeric" id="saveDepositAmount" class="form-input amount-input" placeholder="0" required>
+            <input type="text" inputmode="numeric" id="saveDepositAmount" class="form-input amount-input" placeholder="0" data-display-id="saveDepositDisplay" required autocomplete="off">
             <div class="quick-chips">
               <button type="button" onclick="addAmount('saveDepositAmount', 50000)">+50 000</button>
               <button type="button" onclick="addAmount('saveDepositAmount', 100000)">+100 000</button>
               <button type="button" onclick="addAmount('saveDepositAmount', 500000)">+500 000</button>
+              <button type="button" onclick="clearAmount('saveDepositAmount')">⌫ Очистить</button>
             </div>
           </div>
 
           <div class="form-group">
             <label>С какого счёта перевести</label>
-            <select id="saveDepositSource" class="form-select" required></select>
+            <div class="account-pill-row" id="saveDepositSourcePills"></div>
+            <input type="hidden" id="saveDepositSource" required>
           </div>
 
           <div class="form-group">
@@ -505,14 +537,20 @@
           <button class="close-modal" onclick="closeModal('modalSaveWithdraw')">✕</button>
         </div>
         <form id="formSaveWithdraw" onsubmit="submitSaveWithdraw(event)">
+          <div class="hero-amount-box">
+            <div class="hero-amount-label">Сумма вывода</div>
+            <div class="hero-amount-display" id="saveWithdrawDisplay">0 <span class="hero-amount-currency">сум</span></div>
+          </div>
+
           <div class="form-group">
             <label>Сумма снятия (сум)</label>
-            <input type="text" inputmode="numeric" id="saveWithdrawAmount" class="form-input amount-input" placeholder="0" required>
+            <input type="text" inputmode="numeric" id="saveWithdrawAmount" class="form-input amount-input" placeholder="0" data-display-id="saveWithdrawDisplay" required autocomplete="off">
           </div>
 
           <div class="form-group">
             <label>На какой счёт зачислить</label>
-            <select id="saveWithdrawDest" class="form-select" required></select>
+            <div class="account-pill-row" id="saveWithdrawDestPills"></div>
+            <input type="hidden" id="saveWithdrawDest" required>
           </div>
 
           <div class="form-group">
@@ -668,6 +706,6 @@
 
   </div>
 
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=4.0"></script>
 </body>
 </html>

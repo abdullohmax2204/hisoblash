@@ -1048,6 +1048,152 @@ body.light-theme .progress-bar-container {
   margin-bottom: 6px;
 }
 
+/* Hero Amount Card */
+.hero-amount-box {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset);
+  border-radius: var(--radius-lg);
+  padding: 16px 14px;
+  text-align: center;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.hero-amount-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+
+.hero-amount-display {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  word-break: break-word;
+}
+
+.hero-amount-currency {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Category Chip Grid (Replaces Ugly Native Select) */
+.category-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 2px;
+  scrollbar-width: none;
+}
+
+.category-chip-grid::-webkit-scrollbar { display: none; }
+
+.cat-chip {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset);
+  border-radius: var(--radius-sm);
+  padding: 10px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.cat-chip:active { transform: scale(0.94); }
+
+.cat-chip.selected {
+  background: var(--text-primary);
+  color: var(--bg);
+  border-color: var(--text-primary);
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
+  font-weight: 700;
+}
+
+.cat-chip .cat-chip-icon {
+  font-size: 18px;
+}
+
+.cat-chip span {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Account Pill Row */
+.account-pill-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 6px 2px;
+  scrollbar-width: none;
+}
+
+.account-pill-row::-webkit-scrollbar { display: none; }
+
+.acc-pill {
+  flex: 0 0 auto;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.acc-pill:active { transform: scale(0.94); }
+
+.acc-pill.selected {
+  background: var(--text-primary);
+  color: var(--bg);
+  border-color: var(--text-primary);
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
+}
+
+.acc-pill.selected .acc-pill-balance {
+  color: var(--bg);
+  opacity: 0.8;
+}
+
+.acc-pill-name {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.acc-pill-balance {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Form Inputs & Custom Chevron Selects */
 .form-input, .form-select {
   width: 100%;

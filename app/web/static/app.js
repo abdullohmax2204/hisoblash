@@ -571,61 +571,170 @@ function parseAmountInput(inputOrValue) {
   return isNaN(num) ? 0 : num;
 }
 
+function updateHeroDisplay(input) {
+  if (!input) return;
+  const displayId = input.dataset.displayId;
+  if (!displayId) return;
+  const displayEl = document.getElementById(displayId);
+  if (!displayEl) return;
+
+  const rawNum = parseAmountInput(input.value);
+  const formatted = rawNum > 0 ? formatThousands(rawNum) : '0';
+  displayEl.innerHTML = `${formatted} <span class="hero-amount-currency">сум</span>`;
+}
+
+function formatNumberOnInput(e) {
+  const input = e.target;
+  const formatted = formatThousands(input.value);
+  input.value = formatted;
+  updateHeroDisplay(input);
+}
+
 function initAmountInputListeners() {
   document.querySelectorAll('.amount-input').forEach(input => {
-    input.addEventListener('input', () => {
-      const formatted = formatThousands(input.value);
-      input.value = formatted;
-    });
+    input.removeEventListener('input', formatNumberOnInput);
+    input.removeEventListener('keyup', formatNumberOnInput);
+    input.addEventListener('input', formatNumberOnInput);
+    input.addEventListener('keyup', formatNumberOnInput);
+    updateHeroDisplay(input);
   });
 }
 
-// ==================== DROPDOWNS POPULATION ====================
+function addAmount(inputId, delta) {
+  haptic('light');
+  const input = document.getElementById(inputId);
+  if (input) {
+    const current = parseAmountInput(input.value);
+    const total = current + delta;
+    input.value = formatThousands(total);
+    updateHeroDisplay(input);
+  }
+}
+
+function clearAmount(inputId) {
+  haptic('light');
+  const input = document.getElementById(inputId);
+  if (input) {
+    input.value = '';
+    updateHeroDisplay(input);
+  }
+}
+
+// ==================== VISUAL CHIPS & PILLS POPULATION ====================
 
 const DEFAULT_FALLBACK_INCOME = [
-  { id: '1', name: 'Работа' },
-  { id: '2', name: 'Дизайн' },
-  { id: '3', name: 'Программирование' },
-  { id: '4', name: 'Продажи' },
-  { id: '5', name: 'Подарок' },
-  { id: '6', name: 'Другое' },
+  { id: '1', name: 'Работа', icon: '💼' },
+  { id: '2', name: 'Дизайн', icon: '🎨' },
+  { id: '3', name: 'Программирование', icon: '💻' },
+  { id: '4', name: 'Продажи', icon: '🛒' },
+  { id: '5', name: 'Подарок', icon: '🎁' },
+  { id: '6', name: 'Другое', icon: '➕' },
 ];
 
 const DEFAULT_FALLBACK_EXPENSE = [
-  { id: '1', name: 'Еда' },
-  { id: '2', name: 'Транспорт' },
-  { id: '3', name: 'Одежда' },
-  { id: '4', name: 'Техника' },
-  { id: '5', name: 'Игры' },
-  { id: '6', name: 'Учёба' },
-  { id: '7', name: 'Дом' },
-  { id: '8', name: 'Связь' },
-  { id: '9', name: 'Подарки' },
-  { id: '10', name: 'Другое' },
+  { id: '1', name: 'Еда', icon: '🍔' },
+  { id: '2', name: 'Транспорт', icon: '🚕' },
+  { id: '3', name: 'Одежда', icon: '👕' },
+  { id: '4', name: 'Техника', icon: '💻' },
+  { id: '5', name: 'Игры', icon: '🎮' },
+  { id: '6', name: 'Учёба', icon: '📚' },
+  { id: '7', name: 'Дом', icon: '🏠' },
+  { id: '8', name: 'Связь', icon: '📱' },
+  { id: '9', name: 'Подарки', icon: '🎁' },
+  { id: '10', name: 'Другое', icon: '💳' },
 ];
 
-function populateAccountDropdowns() {
-  const regularAccs = (state.accounts || []).filter(a => !a.is_savings);
-  const optionsHtml = regularAccs.length
-    ? regularAccs.map(a => `<option value="${a.id}">${a.name} (${formatMoney(a.balance)})</option>`).join('')
-    : '<option value="1">Карта (0 сум)</option><option value="2">Наличные (0 сум)</option>';
+function selectCategoryChip(containerId, hiddenInputId, catId) {
+  haptic('light');
+  const container = document.getElementById(containerId);
+  const hiddenInput = document.getElementById(hiddenInputId);
+  if (!container || !hiddenInput) return;
 
-  const ids = [
-    'incomeAccount', 'expenseAccount', 'transferFromAccount',
-    'transferToAccount', 'saveDepositSource', 'saveWithdrawDest',
-    'debtAccount'
-  ];
-
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = optionsHtml;
+  hiddenInput.value = catId;
+  container.querySelectorAll('.cat-chip').forEach(chip => {
+    chip.classList.toggle('selected', String(chip.dataset.id) === String(catId));
   });
 }
 
-function populateCategoryDropdowns() {
-  const expEl = document.getElementById('expenseCategory');
-  const incEl = document.getElementById('incomeCategory');
+function selectAccountPill(containerId, hiddenInputId, accId) {
+  haptic('light');
+  const container = document.getElementById(containerId);
+  const hiddenInput = document.getElementById(hiddenInputId);
+  if (!container || !hiddenInput) return;
 
+  hiddenInput.value = accId;
+  container.querySelectorAll('.acc-pill').forEach(pill => {
+    pill.classList.toggle('selected', String(pill.dataset.id) === String(accId));
+  });
+}
+
+function renderCategoryChips(containerId, hiddenInputId, categories, defaultSelectedId) {
+  const container = document.getElementById(containerId);
+  const hiddenInput = document.getElementById(hiddenInputId);
+  if (!container || !hiddenInput) return;
+
+  const currentVal = hiddenInput.value || defaultSelectedId || (categories[0] ? categories[0].id : '');
+  hiddenInput.value = currentVal;
+
+  container.innerHTML = categories.map(c => {
+    const isSelected = String(c.id) === String(currentVal);
+    const icon = c.icon || (containerId.includes('income') ? '💰' : '🛍');
+    return `
+      <div class="cat-chip ${isSelected ? 'selected' : ''}" data-id="${c.id}" onclick="selectCategoryChip('${containerId}', '${hiddenInputId}', '${c.id}')">
+        <span class="cat-chip-icon">${icon}</span>
+        <span>${c.name}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderAccountPills(containerId, hiddenInputId, accounts, defaultSelectedId) {
+  const container = document.getElementById(containerId);
+  const hiddenInput = document.getElementById(hiddenInputId);
+  if (!container || !hiddenInput) return;
+
+  const regularAccs = (accounts || []).filter(a => !a.is_savings);
+  const activeList = regularAccs.length ? regularAccs : [
+    { id: 1, name: 'Карта', icon: '💳', balance: 0 },
+    { id: 2, name: 'Наличные', icon: '💵', balance: 0 }
+  ];
+
+  const currentVal = hiddenInput.value || defaultSelectedId || activeList[0].id;
+  hiddenInput.value = currentVal;
+
+  container.innerHTML = activeList.map(a => {
+    const isSelected = String(a.id) === String(currentVal);
+    return `
+      <div class="acc-pill ${isSelected ? 'selected' : ''}" data-id="${a.id}" onclick="selectAccountPill('${containerId}', '${hiddenInputId}', '${a.id}')">
+        <span>${a.icon || '💳'}</span>
+        <div>
+          <div class="acc-pill-name">${a.name}</div>
+          <div class="acc-pill-balance">${formatMoney(a.balance)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function populateAccountDropdowns() {
+  const accs = state.accounts || [];
+  renderAccountPills('incomeAccountPills', 'incomeAccount', accs);
+  renderAccountPills('expenseAccountPills', 'expenseAccount', accs);
+  renderAccountPills('transferFromAccountPills', 'transferFromAccount', accs);
+  renderAccountPills('transferToAccountPills', 'transferToAccount', accs);
+  renderAccountPills('saveDepositSourcePills', 'saveDepositSource', accs);
+  renderAccountPills('saveWithdrawDestPills', 'saveWithdrawDest', accs);
+
+  // Standard select fallback for debt
+  const regularAccs = accs.filter(a => !a.is_savings);
+  const optionsHtml = regularAccs.length
+    ? regularAccs.map(a => `<option value="${a.id}">${a.name} (${formatMoney(a.balance)})</option>`).join('')
+    : '<option value="1">Карта (0 сум)</option><option value="2">Наличные (0 сум)</option>';
+  const debtAcc = document.getElementById('debtAccount');
+  if (debtAcc) debtAcc.innerHTML = optionsHtml;
+}
+
+function populateCategoryDropdowns() {
   const expCats = (state.categories?.expense && state.categories.expense.length)
     ? state.categories.expense
     : DEFAULT_FALLBACK_EXPENSE;
@@ -634,17 +743,8 @@ function populateCategoryDropdowns() {
     ? state.categories.income
     : DEFAULT_FALLBACK_INCOME;
 
-  if (expEl) {
-    expEl.innerHTML = expCats.map(c => `
-      <option value="${c.id}">${c.name}</option>
-    `).join('');
-  }
-
-  if (incEl) {
-    incEl.innerHTML = '<option value="">(Без категории)</option>' + incCats.map(c => `
-      <option value="${c.id}">${c.name}</option>
-    `).join('');
-  }
+  renderCategoryChips('expenseCategoryChips', 'expenseCategory', expCats);
+  renderCategoryChips('incomeCategoryChips', 'incomeCategory', incCats);
 }
 
 // ==================== NAVIGATION & MODALS ====================
@@ -669,6 +769,7 @@ function openModal(modalId) {
   haptic('medium');
   populateAccountDropdowns();
   populateCategoryDropdowns();
+  initAmountInputListeners();
   const modal = document.getElementById(modalId);
   if (modal) modal.classList.add('open');
 }
