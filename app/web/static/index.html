@@ -19,7 +19,9 @@
     <!-- Top Header -->
     <header class="app-header">
       <div class="user-profile">
-        <div class="avatar" id="userAvatar">👤</div>
+        <div class="avatar" id="userAvatar">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </div>
         <div class="user-details">
           <div class="profile-switch-bar" style="display: flex; align-items: center; gap: 6px;">
             <select id="userProfileSelect" class="profile-select" onchange="switchUserProfile(this.value)"></select>
@@ -360,7 +362,7 @@
     <div id="modalIncome" class="modal-backdrop">
       <div class="modal-card">
         <div class="modal-header">
-          <h3>💰 Записать доход</h3>
+          <h3>Записать доход</h3>
           <button class="close-modal" onclick="closeModal('modalIncome')">✕</button>
         </div>
         <form id="formIncome" onsubmit="submitIncome(event)">
@@ -399,7 +401,7 @@
     <div id="modalExpense" class="modal-backdrop">
       <div class="modal-card">
         <div class="modal-header">
-          <h3>💸 Записать расход</h3>
+          <h3>Записать расход</h3>
           <button class="close-modal" onclick="closeModal('modalExpense')">✕</button>
         </div>
         <form id="formExpense" onsubmit="submitExpense(event)">
@@ -438,7 +440,7 @@
     <div id="modalTransfer" class="modal-backdrop">
       <div class="modal-card">
         <div class="modal-header">
-          <h3>🔁 Перевод между счетами</h3>
+          <h3>Перевод между счетами</h3>
           <button class="close-modal" onclick="closeModal('modalTransfer')">✕</button>
         </div>
         <form id="formTransfer" onsubmit="submitTransfer(event)">
@@ -466,7 +468,7 @@
     <div id="modalSaveDeposit" class="modal-backdrop">
       <div class="modal-card">
         <div class="modal-header">
-          <h3>💵 Отложить в накопления</h3>
+          <h3>Отложить в накопления</h3>
           <button class="close-modal" onclick="closeModal('modalSaveDeposit')">✕</button>
         </div>
         <form id="formSaveDeposit" onsubmit="submitSaveDeposit(event)">
@@ -499,7 +501,7 @@
     <div id="modalSaveWithdraw" class="modal-backdrop">
       <div class="modal-card">
         <div class="modal-header">
-          <h3>💸 Снять из накоплений</h3>
+          <h3>Снять из накоплений</h3>
           <button class="close-modal" onclick="closeModal('modalSaveWithdraw')">✕</button>
         </div>
         <form id="formSaveWithdraw" onsubmit="submitSaveWithdraw(event)">
@@ -527,7 +529,7 @@
     <div id="modalNewAccount" class="modal-backdrop">
       <div class="modal-card">
         <div class="modal-header">
-          <h3>💳 Новый счёт</h3>
+          <h3>Новый счёт</h3>
           <button class="close-modal" onclick="closeModal('modalNewAccount')">✕</button>
         </div>
         <form id="formNewAccount" onsubmit="submitNewAccount(event)">
@@ -560,7 +562,7 @@
     <div id="modalNewGoal" class="modal-backdrop">
       <div class="modal-card">
         <div class="modal-header">
-          <h3>🎯 Новая цель накоплений</h3>
+          <h3>Новая цель накоплений</h3>
           <button class="close-modal" onclick="closeModal('modalNewGoal')">✕</button>
         </div>
         <form id="formNewGoal" onsubmit="submitNewGoal(event)">
@@ -588,14 +590,14 @@
     <div id="modalSalary" class="modal-backdrop">
       <div class="modal-card">
         <div class="modal-header">
-          <h3>⚙️ Настройка дохода и зарплаты</h3>
+          <h3>Настройка дохода</h3>
           <button class="close-modal" onclick="closeModal('modalSalary')">✕</button>
         </div>
         <form id="formSalary" onsubmit="submitSalaryForm(event)">
           <div class="form-group">
             <label>Ежемесячная зарплата (сум)</label>
             <input type="number" id="salaryMonthlyInput" class="form-input" placeholder="Например: 5000000" min="0" max="1000000000000">
-            <small class="form-help" style="color: var(--text-muted); font-size: 11px;">Используется для расчёта % нагрузки ваших целей на бюджет.</small>
+            <small class="form-help">Используется для расчёта % нагрузки ваших целей на бюджет.</small>
           </div>
 
           <div class="form-group">
@@ -615,7 +617,7 @@
     <div id="modalDebt" class="modal-backdrop">
       <div class="modal-card">
         <div class="modal-header">
-          <h3 id="debtModalTitle">🤝 Операция с долгом</h3>
+          <h3 id="debtModalTitle">Операция с долгом</h3>
           <button class="close-modal" onclick="closeModal('modalDebt')">✕</button>
         </div>
         <form id="formDebt" onsubmit="submitDebtForm(event)">
@@ -646,14 +648,14 @@
     <div id="modalNewProfile" class="modal-backdrop">
       <div class="modal-card">
         <div class="modal-header">
-          <h3>👤 Создать новый профиль</h3>
+          <h3>Новый профиль</h3>
           <button class="close-modal" onclick="closeModal('modalNewProfile')">✕</button>
         </div>
         <form id="formNewProfile" onsubmit="submitNewProfile(event)">
           <div class="form-group">
             <label>Название профиля / Аккаунт</label>
             <input type="text" id="newProfileName" class="form-input" placeholder="Например: Второй аккаунт, Мой тест..." required maxlength="40">
-            <small class="form-help" style="color: var(--text-muted); font-size: 11px;">Каждый профиль имеет полностью свои счета, категории и историю без изменения кода.</small>
+            <small class="form-help">Каждый профиль имеет свои счета, категории и историю.</small>
           </div>
 
           <button type="submit" class="btn-submit btn-accent">Создать профиль</button>
