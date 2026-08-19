@@ -5,8 +5,18 @@
 // Initialize Telegram WebApp SDK & Theme Detection
 const tg = window.Telegram?.WebApp;
 if (tg) {
-  tg.ready();
-  tg.expand();
+  try {
+    tg.ready();
+    tg.expand();
+    if (typeof tg.requestFullscreen === 'function') {
+      tg.requestFullscreen();
+    }
+    if (typeof tg.disableVerticalSwipes === 'function') {
+      tg.disableVerticalSwipes();
+    }
+  } catch (e) {
+    console.debug('Telegram WebApp features init error:', e);
+  }
 
   const isLight = tg.colorScheme === 'light' || isLightBg(tg.themeParams?.bg_color);
   if (isLight) {
