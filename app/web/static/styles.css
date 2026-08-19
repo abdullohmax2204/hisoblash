@@ -77,6 +77,19 @@ body.light-theme {
 *, *::before, *::after {
   margin: 0; padding: 0; box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+html, body {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 body {
@@ -116,6 +129,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: max(12px, env(safe-area-inset-top, 12px)) 16px 12px 16px;
   position: sticky;
   top: 0;
@@ -142,6 +156,11 @@ body {
   gap: 10px;
   flex: 1;
   min-width: 0;
+}
+
+#toggleFullscreenBtn {
+  flex-shrink: 0;
+  margin-left: 2px;
 }
 
 .avatar {
