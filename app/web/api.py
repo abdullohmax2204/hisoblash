@@ -65,16 +65,42 @@ async def handle_get_users(request: web.Request) -> web.Response:
     """GET /api/users - List all available user profiles."""
     async with async_session_factory() as session:
         current_user_id = await get_current_user(request, session)
-        users = await get_all_users(session)
+        all_users = await get_all_users(session)
+
+        # Find primary user (first user or matching authenticated telegram id)
+        init_data = request.headers.get("X-Telegram-Init-Data") or request.query.get("init_data")
+        profile_id = request.headers.get("X-Profile-Id") or request.query.get("profile_id")
+        telegram_id, full_name, explicit_user_id = get_authenticated_user_id(init_data, profile_id)
+
+        primary_user = None
+        if telegram_id:
+            for u in all_users:
+                if u.telegram_id == telegram_id:
+                    primary_user = u
+                    break
+
+        if not primary_user and all_users:
+            primary_user = all_users[0]
+
+        sorted_users = []
+        if primary_user:
+            sorted_users.append(primary_user)
+            for u in all_users:
+                if u.id != primary_user.id:
+                    sorted_users.append(u)
+        else:
+            sorted_users = all_users
+
         return json_response({
             "current_user_id": current_user_id,
             "users": [
                 {
                     "id": u.id,
-                    "name": u.name,
+                    "name": u.name if u.name and u.name != "Admin User" else ("Основной" if primary_user and u.id == primary_user.id else f"Профиль {u.id}"),
                     "telegram_id": u.telegram_id,
+                    "is_primary": bool(primary_user and u.id == primary_user.id),
                 }
-                for u in users
+                for u in sorted_users
             ],
         })
 

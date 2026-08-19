@@ -1477,11 +1477,10 @@ function updateProfilePillUI() {
   const activeId = localStorage.getItem('activeProfileId');
   const activeProf = userProfilesList.find(u => String(u.id) === String(activeId)) || userProfilesList[0];
 
-  if (!userProfilesList.length || userProfilesList.length === 1) {
-    nameEl.textContent = userProfilesList[0]?.name && userProfilesList[0].name !== 'Admin User' ? userProfilesList[0].name : 'Основной';
+  if (activeProf) {
+    nameEl.textContent = activeProf.name || 'Основной';
   } else {
-    const isFirst = userProfilesList[0]?.id === activeProf?.id;
-    nameEl.textContent = isFirst ? (activeProf?.name && activeProf.name !== 'Admin User' ? activeProf.name : 'Основной') : (activeProf?.name || 'Профиль');
+    nameEl.textContent = 'Основной';
   }
 }
 
@@ -1491,11 +1490,11 @@ function openProfilePicker() {
   const addBox = document.getElementById('profilePickerAddBox');
   if (!listContainer) return;
 
-  const activeId = localStorage.getItem('activeProfileId');
+  const activeId = localStorage.getItem('activeProfileId') || (userProfilesList[0]?.id);
 
   listContainer.innerHTML = userProfilesList.map((u, idx) => {
-    const isActive = String(u.id) === String(activeId) || (!activeId && idx === 0);
-    const displayName = idx === 0 ? (u.name === 'Admin User' ? 'Основной' : u.name) : u.name;
+    const isActive = String(u.id) === String(activeId);
+    const displayName = u.name || (idx === 0 ? 'Основной' : `Профиль ${idx + 1}`);
 
     const editBtn = `
       <button class="profile-action-icon" onclick="openRenameModal(event, ${u.id}, '${displayName.replace(/'/g, "\\'")}')" title="Переименовать">
@@ -1552,7 +1551,7 @@ function openRenameModal(e, userId, currentName) {
   document.getElementById('renameProfileUserId').value = userId;
   const input = document.getElementById('renameProfileNameInput');
   if (input) {
-    input.value = currentName === 'Основной' ? 'Основной' : currentName;
+    input.value = currentName;
   }
   openModal('modalRenameProfile');
 }
