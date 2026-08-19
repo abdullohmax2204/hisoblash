@@ -2,11 +2,27 @@
  * Hisoblash Telegram Mini App - Client Logic
  */
 
-// Initialize Telegram WebApp SDK
+// Initialize Telegram WebApp SDK & Theme Detection
 const tg = window.Telegram?.WebApp;
 if (tg) {
   tg.ready();
   tg.expand();
+
+  const isLight = tg.colorScheme === 'light' || isLightBg(tg.themeParams?.bg_color);
+  if (isLight) {
+    document.body.classList.add('light-theme');
+  }
+}
+
+function isLightBg(hex) {
+  if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return false;
+  const rgb = parseInt(hex.slice(1), 16);
+  if (isNaN(rgb)) return false;
+  const r = (rgb >> 16) & 0xff;
+  const g = (rgb >> 8) & 0xff;
+  const b = (rgb >> 0) & 0xff;
+  const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return luma > 128;
 }
 
 // Global Application State

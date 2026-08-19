@@ -12,10 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class AuthMiddleware(BaseMiddleware):
-    """Blocks all updates from unauthorized users.
-
-    Only ADMIN_USER_ID from .env is allowed to interact with the bot.
-    """
+    """Allows all Telegram users to access the bot with their isolated account."""
 
     async def __call__(
         self,
@@ -23,26 +20,4 @@ class AuthMiddleware(BaseMiddleware):
         event: TelegramObject,
         data: dict[str, Any],
     ) -> Any:
-        # Extract user from the event
-        user = None
-        if isinstance(event, Message):
-            user = event.from_user
-        elif isinstance(event, CallbackQuery):
-            user = event.from_user
-
-        if user is None:
-            return  # Skip events without user (e.g., channel posts)
-
-        if user.id != settings.admin_user_id:
-            logger.warning(
-                "Unauthorized access attempt: user_id=%d username=%s",
-                user.id,
-                user.username or "N/A",
-            )
-            if isinstance(event, Message):
-                await event.answer("⛔ Доступ запрещен.")
-            elif isinstance(event, CallbackQuery):
-                await event.answer("⛔ Доступ запрещен.", show_alert=True)
-            return  # Do not call the handler
-
         return await handler(event, data)
