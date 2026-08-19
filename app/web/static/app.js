@@ -1438,13 +1438,21 @@ function openProfilePicker() {
     const isActive = String(u.id) === String(activeId) || (!activeId && idx === 0);
     const displayName = idx === 0 ? 'Основной' : u.name;
 
+    const editBtn = idx > 0 ? `
+      <button class="profile-action-icon" onclick="promptRenameProfile(event, ${u.id}, '${displayName.replace(/'/g, "\\'")}') " title="Переименовать">
+        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+      </button>
+    ` : '';
+
     return `
       <div class="profile-item-row ${isActive ? 'active' : ''}" onclick="selectProfileAndClose(${u.id})">
         <div class="profile-item-left">
           <div class="profile-item-badge">${idx + 1}</div>
           <div class="profile-item-name">${displayName}</div>
         </div>
-        ${isActive ? '<div class="profile-item-check">✓</div>' : ''}
+        <div class="profile-item-actions">
+          ${editBtn}
+        </div>
       </div>
     `;
   }).join('');
@@ -1465,6 +1473,25 @@ function openProfilePicker() {
   }
 
   openModal('modalProfilePicker');
+}
+
+async function promptRenameProfile(e, userId, currentName) {
+  e.stopPropagation();
+  haptic('medium');
+  const newName = prompt('Введите название профиля:', currentName === 'Основной' ? '' : currentName);
+  if (!newName || !newName.trim()) return;
+
+  try {
+    await apiFetch('/api/users/rename', {
+      method: 'POST',
+      body: JSON.stringify({ user_id: userId, name: newName.trim() })
+    });
+    showToast('Название профиля обновлено', 'success');
+    await loadUserProfiles();
+    openProfilePicker();
+  } catch (err) {
+    showToast(err.message || 'Ошибка обновления названия', 'error');
+  }
 }
 
 async function selectProfileAndClose(profileId) {

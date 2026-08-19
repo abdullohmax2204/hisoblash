@@ -276,16 +276,29 @@ body {
   color: var(--text-primary);
 }
 
-.profile-item-tag {
-  font-size: 11px;
-  color: var(--text-tertiary);
-  font-weight: 500;
+.profile-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.profile-item-check {
-  color: var(--green);
-  font-size: 16px;
-  font-weight: 800;
+.profile-action-icon {
+  background: var(--glass-bg-sub);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.profile-action-icon:active {
+  transform: scale(0.9);
+  color: var(--text-primary);
 }
 
 .btn-add-profile {

@@ -101,6 +101,54 @@ async def handle_create_user_profile(request: web.Request) -> web.Response:
         }, 201)
 
 
+async def handle_update_user_name(request: web.Request) -> web.Response:
+    """POST /api/users/rename - Update name of a user profile."""
+    try:
+        body = await request.json()
+        user_id = int(body.get("user_id", 0))
+        new_name = str(body.get("name", "")).strip()
+    except Exception:
+        return json_response({"error": "Неверные данные"}, 400)
+
+    if not new_name:
+        return json_response({"error": "Название не может быть пустым"}, 400)
+
+    async with async_session_factory() as session:
+        from app.database.models.user import User
+        user = await session.get(User, user_id)
+        if not user:
+            return json_response({"error": "Профиль не найден"}, 404)
+
+        user.name = new_name
+        await session.commit()
+        return json_response({"id": user.id, "name": user.name})
+
+
+async def handle_delete_user_profile(request: web.Request) -> web.Response:
+    """POST /api/users/delete - Delete a secondary profile."""
+    try:
+        body = await request.json()
+        user_id = int(body.get("user_id", 0))
+    except Exception:
+        return json_response({"error": "Неверные данные"}, 400)
+
+    async with async_session_factory() as session:
+        from app.database.models.user import User
+        users = await get_all_users(session)
+        if len(users) <= 1:
+            return json_response({"error": "Нельзя удалить единственный профиль"}, 400)
+
+        if user_id == users[0].id:
+            return json_response({"error": "Нельзя удалить основной профиль"}, 400)
+
+        user = await session.get(User, user_id)
+        if user:
+            await session.delete(user)
+            await session.commit()
+
+        return json_response({"success": True})
+
+
 async def handle_summary(request: web.Request) -> web.Response:
     """GET /api/summary - Complete dashboard summary."""
     async with async_session_factory() as session:

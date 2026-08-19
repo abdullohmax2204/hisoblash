@@ -49,6 +49,8 @@ def create_web_app() -> web.Application:
     # API Routes
     app.router.add_get("/api/users", api.handle_get_users)
     app.router.add_post("/api/users/create", api.handle_create_user_profile)
+    app.router.add_post("/api/users/rename", api.handle_update_user_name)
+    app.router.add_post("/api/users/delete", api.handle_delete_user_profile)
     app.router.add_get("/api/summary", api.handle_summary)
     app.router.add_get("/api/accounts", api.handle_get_accounts)
     app.router.add_post("/api/accounts", api.handle_create_account)
