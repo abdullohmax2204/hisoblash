@@ -236,32 +236,76 @@ function renderRecentTx(transactions) {
   container.innerHTML = transactions.map(tx => createTxItemHTML(tx)).join('');
 }
 
+function getIconHTML(iconStr, defaultClass = '') {
+  if (!iconStr) iconStr = 'card';
+
+  if (iconStr === '💳' || iconStr === 'card') {
+    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>`;
+  }
+  if (iconStr === '💵' || iconStr === 'cash' || iconStr === 'money') {
+    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="3"></circle><path d="M6 12h.01M18 12h.01"></path></svg>`;
+  }
+  if (iconStr === '🏦' || iconStr === 'bank') {
+    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 3l9 7H3l9-7z"></path></svg>`;
+  }
+  if (iconStr === '🪙' || iconStr === 'crypto' || iconStr === 'coin') {
+    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v12M9 9h6M9 15h6"></path></svg>`;
+  }
+  if (iconStr === '💰' || iconStr === 'income') {
+    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
+  }
+  if (iconStr === '💸' || iconStr === 'expense') {
+    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 5v14M5 12l7 7 7-7"/></svg>`;
+  }
+  if (iconStr === '🔁' || iconStr === 'transfer') {
+    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 1 21 5 17 9"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23 3 19 7 15"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>`;
+  }
+  if (iconStr === '🎯' || iconStr === 'target' || iconStr === 'saving') {
+    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>`;
+  }
+  if (iconStr === '🤝' || iconStr === 'debt') {
+    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`;
+  }
+  if (iconStr === '👤' || iconStr === 'user') {
+    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+  }
+
+  return `<span>${iconStr}</span>`;
+}
+
 function createTxItemHTML(tx, allowDelete = false) {
   let sign = '';
   let colorClass = 'expense';
+  let iconKey = tx.category_icon || 'expense';
 
   if (tx.type === 'income') {
     sign = '+';
     colorClass = 'income';
+    if (!tx.category_icon) iconKey = 'income';
   } else if (tx.type === 'expense') {
     sign = '-';
     colorClass = 'expense';
+    if (!tx.category_icon) iconKey = 'expense';
   } else if (tx.type === 'transfer') {
-    sign = '🔁 ';
+    sign = '';
     colorClass = 'transfer';
+    iconKey = 'transfer';
   } else if (tx.type === 'saving') {
-    sign = '💵 ';
+    sign = '';
     colorClass = 'saving';
+    iconKey = 'target';
   } else if (tx.type === 'saving_withdraw') {
-    sign = '↩️ ';
+    sign = '+';
     colorClass = 'income';
+    iconKey = 'target';
   } else if (tx.type === 'debt_given' || tx.type === 'debt_taken' || tx.type === 'debt_return') {
-    sign = '🤝 ';
+    sign = '';
     colorClass = 'debt';
+    iconKey = 'debt';
   }
 
   const title = tx.category_name || tx.description || 'Операция';
-  const icon = tx.category_icon || '📝';
+  const iconHTML = getIconHTML(iconKey);
   const meta = `${tx.account_name || 'Счет'} • ${formatDate(tx.created_at)}`;
 
   const deleteBtn = allowDelete
@@ -271,7 +315,7 @@ function createTxItemHTML(tx, allowDelete = false) {
   return `
     <div class="tx-item">
       <div class="tx-left">
-        <div class="tx-icon-box">${icon}</div>
+        <div class="tx-icon-box ${colorClass}">${iconHTML}</div>
         <div class="tx-info">
           <div class="tx-title">${title}</div>
           <div class="tx-meta">${meta}</div>
@@ -292,9 +336,11 @@ function renderAccountsList() {
 
   const html = state.accounts.map(acc => `
     <div class="account-card-item">
-      <div class="acc-icon">${acc.icon || '💳'}</div>
-      <div class="acc-name">${acc.name}</div>
-      <div class="acc-balance">${formatMoney(acc.balance)}</div>
+      <div class="acc-icon-badge">${getIconHTML(acc.icon || 'card')}</div>
+      <div class="acc-info">
+        <div class="acc-name">${acc.name}</div>
+        <div class="acc-balance">${formatMoney(acc.balance)}</div>
+      </div>
     </div>
   `).join('');
 
@@ -318,13 +364,16 @@ function renderGoals() {
   goalsContainer.innerHTML = goals.map(g => `
     <div class="goal-item">
       <div class="goal-top">
-        <div class="goal-name">${g.name} ${g.is_funded ? '✅' : ''}</div>
+        <div class="goal-name">
+          ${g.name}
+          ${g.is_funded ? '<span class="status-badge green" style="font-size: 10px; padding: 2px 6px; margin-left: 6px;">Достигнуто</span>' : ''}
+        </div>
         <div>
           <span class="goal-target">${g.pct}% (${formatMoney(g.target_amount)})</span>
           <button class="goal-delete-btn" onclick="deleteGoal(${g.id})" title="Удалить">✕</button>
         </div>
       </div>
-      ${g.target_date ? `<div style="font-size:11px; color:#94a3b8; margin-top:-2px; margin-bottom:6px;">⏳ Дедлайн: ${formatDate(g.target_date)}</div>` : ''}
+      ${g.target_date ? `<div style="font-size:11px; color:var(--text-muted); margin-top:2px; margin-bottom:6px;">Дедлайн: ${formatDate(g.target_date)}</div>` : ''}
       <div class="progress-bar-container">
         <div class="progress-bar-fill" style="width: ${Math.min(g.pct, 100)}%;"></div>
       </div>
@@ -343,7 +392,8 @@ function renderLoadAnalysis(a) {
   const breakdownContainer = document.getElementById('loadGoalsBreakdown');
 
   if (badge) {
-    badge.textContent = `${a.stress_icon} ${a.stress_pct}%`;
+    const levelLabel = a.stress_level === 'green' ? 'Безопасно' : (a.stress_level === 'yellow' ? 'Умеренно' : 'Высокая');
+    badge.innerHTML = `<span class="status-dot ${a.stress_level}"></span> ${a.stress_pct}% • ${levelLabel}`;
     badge.className = `status-badge ${a.stress_level}`;
   }
 
@@ -366,16 +416,16 @@ function renderLoadAnalysis(a) {
     }
 
     breakdownContainer.innerHTML = a.goals.map(g => {
-      const dateInfo = g.target_date ? `⏳ дедлайн: ${formatDate(g.target_date)} (${g.months_left} мес)` : 'без даты (расчет на 12 мес)';
+      const dateInfo = g.target_date ? `дедлайн: ${formatDate(g.target_date)} (${g.months_left} мес)` : 'без даты (расчет на 12 мес)';
       return `
         <div class="load-goal-item">
           <div>
             <div class="load-goal-name">${g.name}</div>
-            <div class="load-goal-details" style="text-align: left; font-size: 11px; color: #94a3b8;">${dateInfo}</div>
+            <div class="load-goal-details" style="text-align: left; font-size: 11px; color: var(--text-muted);">${dateInfo}</div>
           </div>
           <div class="load-goal-details">
             <div class="load-goal-req">${formatMoney(g.required_monthly)}/мес</div>
-            <div style="font-size: 11px; color: #94a3b8;">(${formatMoney(g.required_15day)}/15дн)</div>
+            <div style="font-size: 11px; color: var(--text-muted);">(${formatMoney(g.required_15day)}/15дн)</div>
           </div>
         </div>
       `;
@@ -395,7 +445,13 @@ function renderDebtsList() {
   container.innerHTML = list.map(d => `
     <div class="debt-item">
       <div class="debt-item-info">
-        <div class="person">👤 ${d.person_name}</div>
+        <div class="person">
+          <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align: text-bottom; margin-right: 4px; color: var(--text-muted);">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          ${d.person_name}
+        </div>
         <div class="date">Создан: ${formatDate(d.created_at)}</div>
       </div>
       <div class="debt-item-right">
