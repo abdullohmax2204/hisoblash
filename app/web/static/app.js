@@ -8,9 +8,6 @@ if (tg) {
   try {
     tg.ready();
     tg.expand();
-    if (typeof tg.requestFullscreen === 'function') {
-      tg.requestFullscreen();
-    }
     if (typeof tg.disableVerticalSwipes === 'function') {
       tg.disableVerticalSwipes();
     }
@@ -27,6 +24,16 @@ if (tg) {
 }
 
 document.addEventListener('fullscreenchange', updateFullscreenBtnState);
+window.addEventListener('resize', updateFullscreenBtnState);
+
+function isMobileDevice() {
+  if (tg?.platform) {
+    const p = tg.platform.toLowerCase();
+    if (['android', 'ios', 'mobile'].includes(p)) return true;
+    if (['tdesktop', 'macos', 'web', 'weba', 'webk'].includes(p)) return false;
+  }
+  return window.innerWidth <= 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
 
 function toggleFullscreenMode() {
   haptic('light');
@@ -55,6 +62,15 @@ function toggleFullscreenMode() {
 function updateFullscreenBtnState() {
   const btn = document.getElementById('toggleFullscreenBtn');
   if (!btn) return;
+
+  // On Mobile (phones), hide the windowed/fullscreen button completely
+  if (isMobileDevice()) {
+    btn.style.display = 'none';
+    return;
+  }
+
+  // On Desktop / Laptop / PC, display the toggle button
+  btn.style.display = 'flex';
   const isFull = (tg && tg.isFullscreen) || !!document.fullscreenElement;
   
   if (isFull) {

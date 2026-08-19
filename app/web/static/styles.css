@@ -18,9 +18,9 @@
   --text-secondary: rgba(255, 255, 255, 0.65);
   --text-tertiary: rgba(255, 255, 255, 0.4);
   
-  --hero-card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 245, 0.9));
-  --hero-card-text: #000000;
-  --hero-card-muted: rgba(0, 0, 0, 0.55);
+  --hero-card-bg: var(--glass-bg);
+  --hero-card-text: var(--text-primary);
+  --hero-card-muted: var(--text-secondary);
   
   --modal-bg: rgba(20, 20, 24, 0.92);
   --input-bg: rgba(255, 255, 255, 0.07);
@@ -62,9 +62,9 @@ body.light-theme {
   --text-secondary: rgba(60, 60, 67, 0.7);
   --text-tertiary: rgba(60, 60, 67, 0.45);
   
-  --hero-card-bg: linear-gradient(135deg, #1c1c1e, #2c2c2e);
-  --hero-card-text: #ffffff;
-  --hero-card-muted: rgba(255, 255, 255, 0.65);
+  --hero-card-bg: rgba(255, 255, 255, 0.75);
+  --hero-card-text: #1c1c1e;
+  --hero-card-muted: rgba(60, 60, 67, 0.7);
   
   --modal-bg: rgba(245, 245, 247, 0.95);
   --input-bg: rgba(255, 255, 255, 0.85);
@@ -142,7 +142,6 @@ body {
   gap: 10px;
   flex: 1;
   min-width: 0;
-  margin-right: 8px;
 }
 
 .avatar {
@@ -403,14 +402,17 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== CAPITAL HERO CARD ===== */
+/* ===== CAPITAL HERO CARD (Apple Frosted Glass) ===== */
 .capital-card {
   background: var(--hero-card-bg);
-  color: var(--hero-card-text);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
   border-radius: var(--radius-xl);
   padding: 22px;
   margin-bottom: 18px;
-  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  box-shadow: var(--glass-shadow), var(--glass-inset);
   position: relative;
   overflow: hidden;
 }
@@ -419,7 +421,7 @@ body {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  background: linear-gradient(90deg, transparent, var(--glass-border-light), transparent);
 }
 
 .capital-header {
@@ -434,18 +436,20 @@ body {
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: var(--hero-card-muted);
+  color: var(--text-secondary);
 }
 
 .eye-toggle {
   background: none;
   border: none;
-  color: var(--hero-card-muted);
+  color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   padding: 4px;
+  transition: opacity 0.15s ease;
 }
+.eye-toggle:active { opacity: 0.6; }
 
 .capital-amount {
   font-size: 32px;
@@ -454,12 +458,13 @@ body {
   margin-bottom: 18px;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
 }
 
 .capital-breakdown {
   display: flex;
   padding-top: 14px;
-  border-top: 1px solid rgba(128, 128, 128, 0.2);
+  border-top: 1px solid var(--glass-border);
 }
 
 .breakdown-item {
@@ -470,8 +475,8 @@ body {
 }
 
 .mini-label {
-  font-size: 10px;
-  color: var(--hero-card-muted);
+  font-size: 11px;
+  color: var(--text-tertiary);
   font-weight: 600;
 }
 
