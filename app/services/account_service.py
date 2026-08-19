@@ -18,13 +18,29 @@ class AccountService:
         self.session = session
 
     async def get_user_accounts(self, user_id: int, include_savings: bool = True) -> list[Account]:
-        """Get all active accounts for user."""
+        """Get all active accounts for user, auto-seeding defaults if empty."""
         query = select(Account).where(Account.user_id == user_id, Account.is_active == True)
         if not include_savings:
             query = query.where(Account.is_savings == False)
         query = query.order_by(Account.sort_order, Account.id)
         result = await self.session.execute(query)
-        return list(result.scalars().all())
+        accounts = list(result.scalars().all())
+
+        if not accounts and user_id:
+            from app.services.user_service import DEFAULT_ACCOUNTS
+            for acc_data in DEFAULT_ACCOUNTS:
+                account = Account(
+                    user_id=user_id,
+                    balance=Decimal("0"),
+                    **acc_data,
+                )
+                self.session.add(account)
+            await self.session.flush()
+            # Re-fetch
+            result = await self.session.execute(query)
+            accounts = list(result.scalars().all())
+
+        return accounts
 
     async def get_account_by_id(self, account_id: int, user_id: int) -> Account | None:
         """Get account by ID ensuring it belongs to user."""

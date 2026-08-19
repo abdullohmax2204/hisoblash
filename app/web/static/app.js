@@ -551,11 +551,64 @@ function renderFullHistory(transactions) {
   document.getElementById('nextPageBtn').disabled = !state.historyHasNext;
 }
 
+// ==================== NUMBER FORMATTING & INPUT MASKS ====================
+
+function formatThousands(valStr) {
+  if (valStr === undefined || valStr === null || valStr === '') return '';
+  const clean = valStr.toString().replace(/[^\d.,]/g, '').replace(',', '.');
+  const parts = clean.split('.');
+  const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  if (parts.length > 1) {
+    return `${integerPart}.${parts[1].slice(0, 2)}`;
+  }
+  return integerPart;
+}
+
+function parseAmountInput(inputOrValue) {
+  let val = typeof inputOrValue === 'string' ? inputOrValue : (inputOrValue?.value || '0');
+  val = val.toString().replace(/\s+/g, '').replace(',', '.');
+  const num = parseFloat(val);
+  return isNaN(num) ? 0 : num;
+}
+
+function initAmountInputListeners() {
+  document.querySelectorAll('.amount-input').forEach(input => {
+    input.addEventListener('input', () => {
+      const formatted = formatThousands(input.value);
+      input.value = formatted;
+    });
+  });
+}
+
 // ==================== DROPDOWNS POPULATION ====================
 
+const DEFAULT_FALLBACK_INCOME = [
+  { id: '1', name: 'Работа' },
+  { id: '2', name: 'Дизайн' },
+  { id: '3', name: 'Программирование' },
+  { id: '4', name: 'Продажи' },
+  { id: '5', name: 'Подарок' },
+  { id: '6', name: 'Другое' },
+];
+
+const DEFAULT_FALLBACK_EXPENSE = [
+  { id: '1', name: 'Еда' },
+  { id: '2', name: 'Транспорт' },
+  { id: '3', name: 'Одежда' },
+  { id: '4', name: 'Техника' },
+  { id: '5', name: 'Игры' },
+  { id: '6', name: 'Учёба' },
+  { id: '7', name: 'Дом' },
+  { id: '8', name: 'Связь' },
+  { id: '9', name: 'Подарки' },
+  { id: '10', name: 'Другое' },
+];
+
 function populateAccountDropdowns() {
-  const regularAccs = state.accounts.filter(a => !a.is_savings);
-  const optionsHtml = regularAccs.map(a => `<option value="${a.id}">${a.icon || '💳'} ${a.name} (${formatMoney(a.balance)})</option>`).join('');
+  const regularAccs = (state.accounts || []).filter(a => !a.is_savings);
+  const optionsHtml = regularAccs.length
+    ? regularAccs.map(a => `<option value="${a.id}">${a.name} (${formatMoney(a.balance)})</option>`).join('')
+    : '<option value="1">Карта (0 сум)</option><option value="2">Наличные (0 сум)</option>';
 
   const ids = [
     'incomeAccount', 'expenseAccount', 'transferFromAccount',
@@ -573,15 +626,23 @@ function populateCategoryDropdowns() {
   const expEl = document.getElementById('expenseCategory');
   const incEl = document.getElementById('incomeCategory');
 
-  if (expEl && state.categories.expense) {
-    expEl.innerHTML = state.categories.expense.map(c => `
-      <option value="${c.id}">${c.icon || '🛍'} ${c.name}</option>
+  const expCats = (state.categories?.expense && state.categories.expense.length)
+    ? state.categories.expense
+    : DEFAULT_FALLBACK_EXPENSE;
+
+  const incCats = (state.categories?.income && state.categories.income.length)
+    ? state.categories.income
+    : DEFAULT_FALLBACK_INCOME;
+
+  if (expEl) {
+    expEl.innerHTML = expCats.map(c => `
+      <option value="${c.id}">${c.name}</option>
     `).join('');
   }
 
-  if (incEl && state.categories.income) {
-    incEl.innerHTML = '<option value="">(Без категории)</option>' + state.categories.income.map(c => `
-      <option value="${c.id}">${c.icon || '💰'} ${c.name}</option>
+  if (incEl) {
+    incEl.innerHTML = '<option value="">(Без категории)</option>' + incCats.map(c => `
+      <option value="${c.id}">${c.name}</option>
     `).join('');
   }
 }
@@ -599,7 +660,6 @@ function switchTab(tabId) {
   if (activeTab) activeTab.classList.add('active');
   if (activeNav) activeNav.classList.add('active');
 
-  // Trigger data reload for specific tabs
   if (tabId === 'tab-stats') loadStats();
   if (tabId === 'tab-debts') loadDebts();
   if (tabId === 'tab-history') loadHistory(0);
@@ -607,6 +667,8 @@ function switchTab(tabId) {
 
 function openModal(modalId) {
   haptic('medium');
+  populateAccountDropdowns();
+  populateCategoryDropdowns();
   const modal = document.getElementById(modalId);
   if (modal) modal.classList.add('open');
 }
@@ -621,8 +683,9 @@ function addAmount(inputId, delta) {
   haptic('light');
   const input = document.getElementById(inputId);
   if (input) {
-    const current = Number(input.value || 0);
-    input.value = current + delta;
+    const current = parseAmountInput(input.value);
+    const total = current + delta;
+    input.value = formatThousands(total);
   }
 }
 
@@ -676,9 +739,10 @@ async function handleFormSubmit(e, asyncCallback) {
 
 async function submitIncome(e) {
   await handleFormSubmit(e, async () => {
-    const amount = document.getElementById('incomeAmount').value;
+    const amount = parseAmountInput(document.getElementById('incomeAmount'));
     const account_id = document.getElementById('incomeAccount').value;
-    const category_id = document.getElementById('incomeCategory').value;
+    const rawCat = document.getElementById('incomeCategory').value;
+    const category_id = rawCat && !isNaN(parseInt(rawCat)) ? parseInt(rawCat) : null;
     const description = document.getElementById('incomeDesc').value;
 
     try {
@@ -698,9 +762,10 @@ async function submitIncome(e) {
 
 async function submitExpense(e) {
   await handleFormSubmit(e, async () => {
-    const amount = document.getElementById('expenseAmount').value;
+    const amount = parseAmountInput(document.getElementById('expenseAmount'));
     const account_id = document.getElementById('expenseAccount').value;
-    const category_id = document.getElementById('expenseCategory').value;
+    const rawCat = document.getElementById('expenseCategory').value;
+    const category_id = rawCat && !isNaN(parseInt(rawCat)) ? parseInt(rawCat) : null;
     const description = document.getElementById('expenseDesc').value;
 
     try {
@@ -720,7 +785,7 @@ async function submitExpense(e) {
 
 async function submitTransfer(e) {
   await handleFormSubmit(e, async () => {
-    const amount = document.getElementById('transferAmount').value;
+    const amount = parseAmountInput(document.getElementById('transferAmount'));
     const from_account_id = document.getElementById('transferFromAccount').value;
     const to_account_id = document.getElementById('transferToAccount').value;
 
@@ -741,7 +806,7 @@ async function submitTransfer(e) {
 
 async function submitSaveDeposit(e) {
   await handleFormSubmit(e, async () => {
-    const amount = document.getElementById('saveDepositAmount').value;
+    const amount = parseAmountInput(document.getElementById('saveDepositAmount'));
     const source_account_id = document.getElementById('saveDepositSource').value;
     const description = document.getElementById('saveDepositDesc').value;
 
@@ -765,7 +830,7 @@ async function submitSaveDeposit(e) {
 
 async function submitSaveWithdraw(e) {
   await handleFormSubmit(e, async () => {
-    const amount = document.getElementById('saveWithdrawAmount').value;
+    const amount = parseAmountInput(document.getElementById('saveWithdrawAmount'));
     const dest_account_id = document.getElementById('saveWithdrawDest').value;
     const description = document.getElementById('saveWithdrawDesc').value;
 
@@ -788,7 +853,7 @@ async function submitNewAccount(e) {
   await handleFormSubmit(e, async () => {
     const name = document.getElementById('newAccountName').value;
     const icon = document.querySelector('input[name="accIcon"]:checked')?.value || '💳';
-    const initial_balance = document.getElementById('newAccountBalance').value || 0;
+    const initial_balance = parseAmountInput(document.getElementById('newAccountBalance'));
 
     try {
       await apiFetch('/api/accounts', {
@@ -808,7 +873,7 @@ async function submitNewAccount(e) {
 async function submitNewGoal(e) {
   await handleFormSubmit(e, async () => {
     const name = document.getElementById('newGoalName').value;
-    const target_amount = document.getElementById('newGoalTarget').value;
+    const target_amount = parseAmountInput(document.getElementById('newGoalTarget'));
     const target_date = document.getElementById('newGoalDate').value;
 
     try {
@@ -827,12 +892,16 @@ async function submitNewGoal(e) {
 }
 
 function openSalaryModal() {
+  const currentVal = state.summary?.user?.monthly_salary;
+  if (currentVal) {
+    document.getElementById('salaryMonthlyInput').value = formatThousands(currentVal);
+  }
   openModal('modalSalary');
 }
 
 async function submitSalaryForm(e) {
   await handleFormSubmit(e, async () => {
-    const monthly_salary = document.getElementById('salaryMonthlyInput').value;
+    const monthly_salary = parseAmountInput(document.getElementById('salaryMonthlyInput'));
     const pay_cycle_days = document.getElementById('salaryCycleInput').value;
 
     try {
@@ -877,7 +946,7 @@ async function deleteTransaction(txId) {
 // ==================== DEBT MODAL DISPATCHER ====================
 
 function openGiveDebtModal() {
-  document.getElementById('debtModalTitle').textContent = '🤝 Дать в долг';
+  document.getElementById('debtModalTitle').textContent = 'Дать в долг';
   document.getElementById('debtFormMode').value = 'give';
   document.getElementById('debtPersonGroup').style.display = 'block';
   document.getElementById('debtAccountLabel').textContent = 'Списать со счёта';
@@ -887,7 +956,7 @@ function openGiveDebtModal() {
 }
 
 function openTakeDebtModal() {
-  document.getElementById('debtModalTitle').textContent = '🤝 Взять в долг';
+  document.getElementById('debtModalTitle').textContent = 'Взять в долг';
   document.getElementById('debtFormMode').value = 'take';
   document.getElementById('debtPersonGroup').style.display = 'block';
   document.getElementById('debtAccountLabel').textContent = 'Зачислить на счёт';
@@ -901,7 +970,7 @@ function openReturnDebtModal(debtId, personName, remAmount) {
   document.getElementById('debtFormMode').value = 'return';
   document.getElementById('debtReturnId').value = debtId;
   document.getElementById('debtPersonGroup').style.display = 'none';
-  document.getElementById('debtAmount').value = remAmount;
+  document.getElementById('debtAmount').value = formatThousands(remAmount);
   document.getElementById('debtAccountLabel').textContent = 'Счёт для взаиморасчёта';
   document.getElementById('debtSubmitBtn').textContent = 'Подтвердить возврат';
   openModal('modalDebt');
@@ -910,7 +979,7 @@ function openReturnDebtModal(debtId, personName, remAmount) {
 async function submitDebtForm(e) {
   await handleFormSubmit(e, async () => {
     const mode = document.getElementById('debtFormMode').value;
-    const amount = document.getElementById('debtAmount').value;
+    const amount = parseAmountInput(document.getElementById('debtAmount'));
     const account_id = document.getElementById('debtAccount').value;
     const person_name = document.getElementById('debtPersonName').value;
     const debt_id = document.getElementById('debtReturnId').value;
@@ -979,6 +1048,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   });
+
+  // Initialize input formatting masks
+  initAmountInputListeners();
 
   // Load initial data
   await loadUserProfiles();
