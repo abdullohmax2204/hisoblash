@@ -8,7 +8,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <!-- Chart.js for analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=5.9">
+  <link rel="stylesheet" href="/static/styles.css?v=6.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -734,6 +734,25 @@
       </div>
     </div>
 
+    <!-- MODAL: RENAME PROFILE -->
+    <div id="modalRenameProfile" class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Название профиля</h3>
+          <button class="close-modal" onclick="closeModal('modalRenameProfile')">✕</button>
+        </div>
+        <form id="formRenameProfile" onsubmit="submitRenameProfile(event)">
+          <input type="hidden" id="renameProfileUserId">
+          <div class="form-group">
+            <label>Введите новое имя</label>
+            <input type="text" id="renameProfileNameInput" class="form-input" placeholder="Например: Работа, Личный..." required maxlength="40">
+          </div>
+
+          <button type="submit" class="btn-submit btn-accent">Сохранить</button>
+        </form>
+      </div>
+    </div>
+
     <!-- MODAL: NEW PROFILE -->
     <div id="modalNewProfile" class="modal-backdrop">
       <div class="modal-card">
@@ -758,6 +777,6 @@
 
   </div>
 
-  <script src="/static/app.js?v=5.9"></script>
+  <script src="/static/app.js?v=6.0"></script>
 </body>
 </html>

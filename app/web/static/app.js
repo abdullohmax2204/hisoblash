@@ -1419,10 +1419,10 @@ function updateProfilePillUI() {
   const activeProf = userProfilesList.find(u => String(u.id) === String(activeId)) || userProfilesList[0];
 
   if (!userProfilesList.length || userProfilesList.length === 1) {
-    nameEl.textContent = 'Основной';
+    nameEl.textContent = userProfilesList[0]?.name && userProfilesList[0].name !== 'Admin User' ? userProfilesList[0].name : 'Основной';
   } else {
     const isFirst = userProfilesList[0]?.id === activeProf?.id;
-    nameEl.textContent = isFirst ? 'Основной' : (activeProf?.name || 'Профиль');
+    nameEl.textContent = isFirst ? (activeProf?.name && activeProf.name !== 'Admin User' ? activeProf.name : 'Основной') : (activeProf?.name || 'Профиль');
   }
 }
 
@@ -1436,11 +1436,22 @@ function openProfilePicker() {
 
   listContainer.innerHTML = userProfilesList.map((u, idx) => {
     const isActive = String(u.id) === String(activeId) || (!activeId && idx === 0);
-    const displayName = idx === 0 ? 'Основной' : u.name;
+    const displayName = idx === 0 ? (u.name === 'Admin User' ? 'Основной' : u.name) : u.name;
 
-    const editBtn = idx > 0 ? `
-      <button class="profile-action-icon" onclick="promptRenameProfile(event, ${u.id}, '${displayName.replace(/'/g, "\\'")}') " title="Переименовать">
-        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+    const editBtn = `
+      <button class="profile-action-icon" onclick="openRenameModal(event, ${u.id}, '${displayName.replace(/'/g, "\\'")}')" title="Переименовать">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+      </button>
+    `;
+
+    const deleteBtn = idx > 0 ? `
+      <button class="profile-action-icon profile-action-delete" onclick="handleDeleteProfileClick(event, ${u.id}, '${displayName.replace(/'/g, "\\'")}')" title="Удалить профиль">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          <line x1="10" y1="11" x2="10" y2="17"></line>
+          <line x1="14" y1="11" x2="14" y2="17"></line>
+        </svg>
       </button>
     ` : '';
 
@@ -1452,6 +1463,7 @@ function openProfilePicker() {
         </div>
         <div class="profile-item-actions">
           ${editBtn}
+          ${deleteBtn}
         </div>
       </div>
     `;
@@ -1475,22 +1487,66 @@ function openProfilePicker() {
   openModal('modalProfilePicker');
 }
 
-async function promptRenameProfile(e, userId, currentName) {
+function openRenameModal(e, userId, currentName) {
   e.stopPropagation();
-  haptic('medium');
-  const newName = prompt('Введите название профиля:', currentName === 'Основной' ? '' : currentName);
-  if (!newName || !newName.trim()) return;
+  haptic('light');
+  document.getElementById('renameProfileUserId').value = userId;
+  const input = document.getElementById('renameProfileNameInput');
+  if (input) {
+    input.value = currentName === 'Основной' ? 'Основной' : currentName;
+  }
+  openModal('modalRenameProfile');
+}
+
+async function submitRenameProfile(e) {
+  e.preventDefault();
+  const userId = document.getElementById('renameProfileUserId')?.value;
+  const input = document.getElementById('renameProfileNameInput');
+  const newName = input?.value?.trim();
+  if (!userId || !newName) return;
 
   try {
+    haptic('medium');
     await apiFetch('/api/users/rename', {
       method: 'POST',
-      body: JSON.stringify({ user_id: userId, name: newName.trim() })
+      body: JSON.stringify({ user_id: Number(userId), name: newName })
     });
-    showToast('Название профиля обновлено', 'success');
+    closeModal('modalRenameProfile');
+    showToast(`Имя изменено на "${newName}"`, 'success');
     await loadUserProfiles();
     openProfilePicker();
   } catch (err) {
     showToast(err.message || 'Ошибка обновления названия', 'error');
+  }
+}
+
+async function handleDeleteProfileClick(e, userId, name) {
+  e.stopPropagation();
+  haptic('medium');
+  if (!confirm(`Удалить профиль "${name}"?`)) {
+    return;
+  }
+
+  try {
+    await apiFetch('/api/users/delete', {
+      method: 'POST',
+      body: JSON.stringify({ user_id: userId })
+    });
+    showToast(`Профиль "${name}" удален`, 'info');
+    
+    // If active was deleted, fallback to first profile
+    const activeId = localStorage.getItem('activeProfileId');
+    if (String(activeId) === String(userId)) {
+      localStorage.removeItem('activeProfileId');
+    }
+
+    await loadUserProfiles();
+    if (userProfilesList.length) {
+      await switchUserProfile(userProfilesList[0].id);
+    }
+    openProfilePicker();
+  } catch (err) {
+    showToast(err.message || 'Ошибка удаления профиля', 'error');
   }
 }
 

@@ -301,6 +301,16 @@ body {
   color: var(--text-primary);
 }
 
+.profile-action-delete {
+  color: var(--red);
+  border-color: rgba(251, 113, 133, 0.2);
+}
+
+.profile-action-delete:active {
+  background: rgba(251, 113, 133, 0.15);
+  color: var(--red);
+}
+
 .btn-add-profile {
   display: flex;
   align-items: center;

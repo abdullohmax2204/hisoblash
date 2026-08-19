@@ -134,6 +134,13 @@ async def handle_delete_user_profile(request: web.Request) -> web.Response:
 
     async with async_session_factory() as session:
         from app.database.models.user import User
+        from app.database.models.transaction import Transaction
+        from app.database.models.debt import Debt
+        from app.database.models.savings_goal import SavingsGoal
+        from app.database.models.account import Account
+        from app.database.models.category import Category
+        from sqlalchemy import delete
+
         users = await get_all_users(session)
         if len(users) <= 1:
             return json_response({"error": "Нельзя удалить единственный профиль"}, 400)
@@ -143,6 +150,11 @@ async def handle_delete_user_profile(request: web.Request) -> web.Response:
 
         user = await session.get(User, user_id)
         if user:
+            await session.execute(delete(Transaction).where(Transaction.user_id == user_id))
+            await session.execute(delete(Debt).where(Debt.user_id == user_id))
+            await session.execute(delete(SavingsGoal).where(SavingsGoal.user_id == user_id))
+            await session.execute(delete(Account).where(Account.user_id == user_id))
+            await session.execute(delete(Category).where(Category.user_id == user_id))
             await session.delete(user)
             await session.commit()
 
