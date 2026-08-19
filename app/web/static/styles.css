@@ -287,10 +287,17 @@ body {
   font-size: 16px;
   font-weight: 800;
 }
-  -webkit-backdrop-filter: blur(12px);
-  transition: all 0.15s;
+
+.btn-add-profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--text-primary);
+  color: var(--bg);
+  width: 100%;
 }
-.btn-xs-outline:active { transform: scale(0.95); opacity: 0.8; }
 
 .icon-btn {
   background: var(--glass-bg);

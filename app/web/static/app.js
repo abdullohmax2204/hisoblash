@@ -1437,16 +1437,12 @@ function openProfilePicker() {
   listContainer.innerHTML = userProfilesList.map((u, idx) => {
     const isActive = String(u.id) === String(activeId) || (!activeId && idx === 0);
     const displayName = idx === 0 ? 'Основной' : u.name;
-    const tag = idx === 0 ? 'Главный профиль' : `Профиль #${idx + 1}`;
 
     return `
       <div class="profile-item-row ${isActive ? 'active' : ''}" onclick="selectProfileAndClose(${u.id})">
         <div class="profile-item-left">
           <div class="profile-item-badge">${idx + 1}</div>
-          <div>
-            <div class="profile-item-name">${displayName}</div>
-            <div class="profile-item-tag">${tag}</div>
-          </div>
+          <div class="profile-item-name">${displayName}</div>
         </div>
         ${isActive ? '<div class="profile-item-check">✓</div>' : ''}
       </div>
@@ -1456,16 +1452,15 @@ function openProfilePicker() {
   if (addBox) {
     if (userProfilesList.length < 3) {
       addBox.innerHTML = `
-        <button class="btn-submit btn-accent" onclick="openNewProfileModal()">
-          + Новый профиль (${userProfilesList.length}/3)
+        <button class="btn-submit btn-accent btn-add-profile" onclick="openNewProfileModal()" title="Добавить профиль">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
         </button>
       `;
     } else {
-      addBox.innerHTML = `
-        <div style="text-align: center; font-size: 12px; color: var(--text-tertiary); padding: 8px 0;">
-          Достигнут максимум профилей (3/3)
-        </div>
-      `;
+      addBox.innerHTML = '';
     }
   }
 

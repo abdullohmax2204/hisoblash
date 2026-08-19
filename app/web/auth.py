@@ -57,6 +57,13 @@ def get_authenticated_user_id(
     
     Returns (telegram_id, full_name, explicit_user_id)
     """
+    explicit_user_id = None
+    if profile_id_header:
+        try:
+            explicit_user_id = int(profile_id_header)
+        except (ValueError, TypeError):
+            pass
+
     if init_data:
         user_info = validate_telegram_init_data(init_data, settings.bot_token)
         if user_info and "id" in user_info:
@@ -64,13 +71,10 @@ def get_authenticated_user_id(
             first_name = user_info.get("first_name", "")
             last_name = user_info.get("last_name", "")
             full_name = f"{first_name} {last_name}".strip() or f"User {tg_id}"
-            return tg_id, full_name, None
+            return tg_id, full_name, explicit_user_id
 
-    if profile_id_header:
-        try:
-            return None, None, int(profile_id_header)
-        except (ValueError, TypeError):
-            pass
+    if explicit_user_id:
+        return None, None, explicit_user_id
 
     # Development / Single-user fallback
     return settings.admin_user_id, "Admin User", None
