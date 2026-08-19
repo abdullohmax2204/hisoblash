@@ -715,6 +715,7 @@ function formatThousands(valStr) {
 }
 
 function parseAmountInput(inputOrValue) {
+  if (typeof inputOrValue === 'number') return isNaN(inputOrValue) ? 0 : inputOrValue;
   let val = typeof inputOrValue === 'string' ? inputOrValue : (inputOrValue?.value || '0');
   val = val.toString().replace(/\s+/g, '').replace(',', '.');
   const num = parseFloat(val);
@@ -1247,29 +1248,41 @@ async function submitSalaryForm(e) {
   });
 }
 
-async function deleteGoal(goalId) {
-  if (!confirm('Удалить эту цель накоплений?')) return;
-  haptic('medium');
-  try {
-    await apiFetch(`/api/savings/goals/${goalId}`, { method: 'DELETE' });
-    showToast('Цель удалена');
-    await loadSummary();
-  } catch (err) {
-    showToast(err.message, 'error');
-  }
+function deleteGoal(goalId) {
+  showConfirmDialog({
+    title: 'Удалить цель?',
+    message: 'Цель накопления будет удалена. Накопленные средства останутся на счете.',
+    btnText: 'Удалить',
+    isDanger: true,
+    onConfirm: async () => {
+      try {
+        await apiFetch(`/api/savings/goals/${goalId}`, { method: 'DELETE' });
+        showToast('Цель удалена', 'info');
+        await loadSummary();
+      } catch (err) {
+        showToast(err.message || 'Ошибка удаления цели', 'error');
+      }
+    }
+  });
 }
 
-async function deleteTransaction(txId) {
-  if (!confirm('Отменить и удалить эту операцию? Баланс счёта будет восстановлен.')) return;
-  haptic('medium');
-  try {
-    await apiFetch(`/api/transactions/${txId}`, { method: 'DELETE' });
-    showToast('Операция отменена');
-    await loadSummary();
-    await loadHistory(state.historyPage);
-  } catch (err) {
-    showToast(err.message, 'error');
-  }
+function deleteTransaction(txId) {
+  showConfirmDialog({
+    title: 'Удалить операцию?',
+    message: 'Операция будет удалена, а баланс счёта скорректирован.',
+    btnText: 'Удалить',
+    isDanger: true,
+    onConfirm: async () => {
+      try {
+        await apiFetch(`/api/transactions/${txId}`, { method: 'DELETE' });
+        showToast('Операция отменена', 'info');
+        await loadSummary();
+        await loadHistory(state.historyPage);
+      } catch (err) {
+        showToast(err.message || 'Ошибка удаления операции', 'error');
+      }
+    }
+  });
 }
 
 // ==================== DEBT MODAL DISPATCHER ====================
