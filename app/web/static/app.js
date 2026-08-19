@@ -14,6 +14,8 @@ if (tg) {
     if (typeof tg.disableVerticalSwipes === 'function') {
       tg.disableVerticalSwipes();
     }
+    tg.onEvent?.('fullscreen_changed', updateFullscreenBtnState);
+    tg.onEvent?.('fullscreen_failed', updateFullscreenBtnState);
   } catch (e) {
     console.debug('Telegram WebApp features init error:', e);
   }
@@ -21,6 +23,46 @@ if (tg) {
   const isLight = tg.colorScheme === 'light' || isLightBg(tg.themeParams?.bg_color);
   if (isLight) {
     document.body.classList.add('light-theme');
+  }
+}
+
+document.addEventListener('fullscreenchange', updateFullscreenBtnState);
+
+function toggleFullscreenMode() {
+  haptic('light');
+  if (tg) {
+    if (tg.isFullscreen) {
+      if (typeof tg.exitFullscreen === 'function') {
+        tg.exitFullscreen();
+      }
+    } else {
+      if (typeof tg.requestFullscreen === 'function') {
+        tg.requestFullscreen();
+      } else if (typeof tg.expand === 'function') {
+        tg.expand();
+      }
+    }
+  } else {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch(() => {});
+    } else {
+      document.exitFullscreen?.().catch(() => {});
+    }
+  }
+  setTimeout(updateFullscreenBtnState, 150);
+}
+
+function updateFullscreenBtnState() {
+  const btn = document.getElementById('toggleFullscreenBtn');
+  if (!btn) return;
+  const isFull = (tg && tg.isFullscreen) || !!document.fullscreenElement;
+  
+  if (isFull) {
+    btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>`;
+    btn.title = 'Обычный оконный режим';
+  } else {
+    btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`;
+    btn.title = 'Полноэкранный режим';
   }
 }
 
@@ -1339,8 +1381,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Initialize input formatting masks
   initAmountInputListeners();
 
-  // Initial badge update
+  // Initial badge and fullscreen state update
   updateNotificationBadge();
+  updateFullscreenBtnState();
 
   // Load initial data
   await loadUserProfiles();
