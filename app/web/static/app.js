@@ -1553,8 +1553,8 @@ async function submitRenameProfile(e) {
 function handleDeleteProfileClick(e, userId, name) {
   e.stopPropagation();
   showConfirmDialog({
-    title: 'Удалить профиль?',
-    message: `Удалить профиль "${name}"? Все связанные с ним данные и счета будут удалены.`,
+    title: `Удаление профиля «${name}»`,
+    message: 'Все связанные данные и счета будут удалены без возможности восстановления.',
     btnText: 'Удалить',
     isDanger: true,
     onConfirm: async () => {
@@ -1563,7 +1563,7 @@ function handleDeleteProfileClick(e, userId, name) {
           method: 'POST',
           body: JSON.stringify({ user_id: userId })
         });
-        showToast(`Профиль "${name}" удален`, 'info');
+        showToast(`Профиль «${name}» удален`, 'info');
         
         // If active was deleted, fallback to first profile
         const activeId = localStorage.getItem('activeProfileId');
