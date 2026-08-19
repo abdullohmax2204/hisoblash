@@ -1,4 +1,4 @@
-/* ===== DESIGN SYSTEM: Apple Frosted Glass / Monochrome Liquid Glass ===== */
+/* ===== DESIGN SYSTEM: Apple Frosted Glass / Liquid Glass (Monochrome Edition) ===== */
 
 :root {
   /* Apple Dark Theme (Default) */
@@ -10,7 +10,7 @@
   --glass-bg-hover: rgba(255, 255, 255, 0.1);
   --glass-bg-sub: rgba(255, 255, 255, 0.03);
   --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-border-light: rgba(255, 255, 255, 0.2);
+  --glass-border-light: rgba(255, 255, 255, 0.22);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
   --glass-inset: inset 0 1px 1px 0 rgba(255, 255, 255, 0.18);
   
@@ -22,7 +22,7 @@
   --hero-card-text: #000000;
   --hero-card-muted: rgba(0, 0, 0, 0.55);
   
-  --modal-bg: rgba(20, 20, 24, 0.85);
+  --modal-bg: rgba(20, 20, 24, 0.92);
   --input-bg: rgba(255, 255, 255, 0.07);
   --input-border: rgba(255, 255, 255, 0.15);
   
@@ -44,7 +44,7 @@
   --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255, 255, 255, 0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }
 
-/* Light theme override (Apple Glass Light) */
+/* Light theme override */
 body.light-theme {
   --bg: #f2f2f7;
   --bg-gradient: radial-gradient(circle at 50% -20%, rgba(0, 122, 255, 0.08), transparent 70%),
@@ -66,7 +66,7 @@ body.light-theme {
   --hero-card-text: #ffffff;
   --hero-card-muted: rgba(255, 255, 255, 0.65);
   
-  --modal-bg: rgba(245, 245, 247, 0.92);
+  --modal-bg: rgba(245, 245, 247, 0.95);
   --input-bg: rgba(255, 255, 255, 0.85);
   --input-border: rgba(0, 0, 0, 0.12);
 
@@ -91,18 +91,27 @@ body {
   user-select: none;
 }
 
-/* ===== APP CONTAINER ===== */
+/* ===== APP CONTAINER (RESPONSIVE PC & PHONE) ===== */
 .app-container {
-  max-width: 440px;
+  width: 100%;
+  max-width: 520px;
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-bottom: calc(var(--nav-height) + 20px);
+  padding-bottom: calc(var(--nav-height) + 24px);
   position: relative;
+  transition: max-width 0.2s ease;
 }
 
-/* ===== HEADER (FROSTED GLASS) ===== */
+@media (min-width: 640px) {
+  .app-container {
+    max-width: 640px;
+    padding-top: 16px;
+  }
+}
+
+/* ===== HEADER ===== */
 .app-header {
   display: flex;
   align-items: center;
@@ -116,6 +125,14 @@ body {
   -webkit-backdrop-filter: blur(28px) saturate(190%);
   border-bottom: 1px solid var(--glass-border);
   box-shadow: var(--glass-inset);
+}
+
+@media (min-width: 640px) {
+  .app-header {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    margin: 0 16px 14px 16px;
+  }
 }
 
 .user-profile {
@@ -185,9 +202,6 @@ body.light-theme .profile-select option {
 }
 .btn-xs-outline:active { transform: scale(0.95); opacity: 0.8; }
 
-.user-details .greeting { display: none; }
-.user-details .user-name { display: none; }
-
 .icon-btn {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
@@ -219,7 +233,7 @@ body.light-theme .profile-select option {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== CAPITAL HERO CARD (APPLE CARD STYLE) ===== */
+/* ===== CAPITAL HERO CARD ===== */
 .capital-card {
   background: var(--hero-card-bg);
   color: var(--hero-card-text);
@@ -311,7 +325,7 @@ body.light-theme .profile-select option {
 .text-purple { color: var(--purple); }
 .text-red { color: var(--red); }
 
-/* ===== QUICK ACTION GRID (LIQUID GLASS BUTTONS) ===== */
+/* ===== QUICK ACTION GRID ===== */
 .action-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -397,7 +411,7 @@ body.light-theme .profile-select option {
   -webkit-backdrop-filter: blur(16px);
 }
 
-/* ===== ACCOUNTS SCROLL (FROSTED TILES) ===== */
+/* ===== ACCOUNTS SCROLL ===== */
 .accounts-scroll {
   display: flex;
   gap: 10px;
@@ -423,7 +437,8 @@ body.light-theme .profile-select option {
 }
 
 .account-card-item .acc-icon-badge {
-  font-size: 18px;
+  display: flex;
+  align-items: center;
   color: var(--text-secondary);
 }
 
@@ -813,7 +828,19 @@ body.light-theme .progress-bar-container {
 .cat-row-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+}
+
+.cat-svg-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
 }
 
 /* ===== TAB 4: DEBTS ===== */
@@ -936,7 +963,7 @@ body.light-theme .progress-bar-container {
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 440px;
+  max-width: 520px;
   height: var(--nav-height);
   background: var(--glass-bg);
   backdrop-filter: blur(28px) saturate(190%);
@@ -947,6 +974,17 @@ body.light-theme .progress-bar-container {
   align-items: center;
   justify-content: space-around;
   z-index: 50;
+  transition: all 0.2s ease;
+}
+
+@media (min-width: 640px) {
+  .bottom-nav {
+    max-width: 480px;
+    bottom: 16px;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), var(--glass-inset);
+  }
 }
 
 .nav-item {
@@ -973,13 +1011,13 @@ body.light-theme .progress-bar-container {
   letter-spacing: -0.2px;
 }
 
-/* ===== MODALS (APPLE FROSTED BOTTOM SHEET) ===== */
+/* ===== MODALS (RESPONSIVE PC & MOBILE) ===== */
 .modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: none;
   align-items: flex-end;
   justify-content: center;
@@ -997,16 +1035,36 @@ body.light-theme .progress-bar-container {
   box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   width: 100%;
-  max-width: 440px;
-  max-height: 88vh;
+  max-width: 520px;
+  max-height: 90vh;
   overflow-y: auto;
   padding: 22px 18px 32px;
-  animation: appleSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: appleSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes appleSlideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
+}
+
+@media (min-width: 640px) {
+  .modal-backdrop {
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-card {
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--glass-border-light);
+    max-width: 480px;
+    animation: desktopModalZoom 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes desktopModalZoom {
+    from { opacity: 0; transform: scale(0.95) translateY(12px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
 }
 
 .modal-header {
@@ -1088,7 +1146,7 @@ body.light-theme .progress-bar-container {
   color: var(--text-secondary);
 }
 
-/* Category Chip Grid (Replaces Ugly Native Select) */
+/* Category Chip Grid */
 .category-chip-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1111,7 +1169,7 @@ body.light-theme .progress-bar-container {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
   cursor: pointer;
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   color: var(--text-secondary);
@@ -1129,7 +1187,9 @@ body.light-theme .progress-bar-container {
 }
 
 .cat-chip .cat-chip-icon {
-  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cat-chip span {
@@ -1181,6 +1241,12 @@ body.light-theme .progress-bar-container {
 .acc-pill.selected .acc-pill-balance {
   color: var(--bg);
   opacity: 0.8;
+}
+
+.acc-pill-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .acc-pill-name {
@@ -1282,11 +1348,11 @@ body.light-theme .form-input:focus, body.light-theme .form-select:focus {
 .icon-opt {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: var(--glass-bg-sub);
   border: 1px solid var(--glass-border);
   color: var(--text-primary);
-  padding: 10px;
+  padding: 10px 12px;
   border-radius: var(--radius-xs);
   font-size: 13px;
   cursor: pointer;
@@ -1314,13 +1380,13 @@ body.light-theme .form-input:focus, body.light-theme .form-select:focus {
 }
 .btn-submit:active { opacity: 0.85; transform: scale(0.98); }
 
-/* All submit buttons: clean high-contrast */
+/* All submit buttons */
 .btn-green, .btn-red, .btn-blue, .btn-amber, .btn-purple, .btn-accent {
   background: var(--text-primary);
   color: var(--bg);
 }
 
-/* ===== TOAST (FROSTED NOTIFICATION) ===== */
+/* ===== TOAST ===== */
 .toast-container {
   position: fixed;
   top: 16px;
@@ -1337,7 +1403,7 @@ body.light-theme .form-input:focus, body.light-theme .form-select:focus {
 .toast {
   background: var(--hero-card-bg);
   color: var(--hero-card-text);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   padding: 12px 16px;
   font-size: 13px;
   font-weight: 600;

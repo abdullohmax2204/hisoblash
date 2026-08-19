@@ -236,56 +236,78 @@ function renderRecentTx(transactions) {
   container.innerHTML = transactions.map(tx => createTxItemHTML(tx)).join('');
 }
 
-function getIconHTML(iconStr, defaultClass = '') {
-  if (!iconStr) iconStr = 'card';
+const SVG_ICONS = {
+  // Accounts
+  card: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>`,
+  cash: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="3"></circle><path d="M6 12h.01M18 12h.01"></path></svg>`,
+  bank: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 3l9 7H3l9-7z"></path></svg>`,
+  crypto: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v12M9 9h6M9 15h6"></path></svg>`,
+  
+  // Actions & General
+  income: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`,
+  expense: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 5v14M5 12l7 7 7-7"/></svg>`,
+  transfer: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 1 21 5 17 9"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23 3 19 7 15"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>`,
+  target: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>`,
+  debt: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+  user: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
 
-  if (iconStr === '💳' || iconStr === 'card') {
-    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>`;
-  }
-  if (iconStr === '💵' || iconStr === 'cash' || iconStr === 'money') {
-    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="3"></circle><path d="M6 12h.01M18 12h.01"></path></svg>`;
-  }
-  if (iconStr === '🏦' || iconStr === 'bank') {
-    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 3l9 7H3l9-7z"></path></svg>`;
-  }
-  if (iconStr === '🪙' || iconStr === 'crypto' || iconStr === 'coin') {
-    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v12M9 9h6M9 15h6"></path></svg>`;
-  }
-  if (iconStr === '💰' || iconStr === 'income') {
-    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
-  }
-  if (iconStr === '💸' || iconStr === 'expense') {
-    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 5v14M5 12l7 7 7-7"/></svg>`;
-  }
-  if (iconStr === '🔁' || iconStr === 'transfer') {
-    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 1 21 5 17 9"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23 3 19 7 15"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>`;
-  }
-  if (iconStr === '🎯' || iconStr === 'target' || iconStr === 'saving') {
-    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>`;
-  }
-  if (iconStr === '🤝' || iconStr === 'debt') {
-    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`;
-  }
-  if (iconStr === '👤' || iconStr === 'user') {
-    return `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
-  }
+  // Categories
+  work: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`,
+  design: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg>`,
+  dev: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>`,
+  sales: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`,
+  gift: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>`,
+  food: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>`,
+  transport: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>`,
+  clothes: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>`,
+  tech: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`,
+  games: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="15" y1="13" x2="15.01" y2="13"></line><line x1="18" y1="11" x2="18.01" y2="11"></line><rect x="2" y="6" width="20" height="12" rx="2"></rect></svg>`,
+  study: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`,
+  home: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`,
+  mobile: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>`,
+  other: `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>`,
+};
 
-  return `<span>${iconStr}</span>`;
+function getCategoryIcon(nameOrKey) {
+  if (!nameOrKey) return SVG_ICONS.other;
+  const str = nameOrKey.toString().toLowerCase();
+
+  if (str.includes('работ') || str.includes('work') || str.includes('job') || str.includes('зарплат') || str.includes('💼')) return SVG_ICONS.work;
+  if (str.includes('дизайн') || str.includes('design') || str.includes('art') || str.includes('🎨')) return SVG_ICONS.design;
+  if (str.includes('програм') || str.includes('dev') || str.includes('code') || str.includes('it') || str.includes('💻')) return SVG_ICONS.dev;
+  if (str.includes('продаж') || str.includes('sale') || str.includes('бизнес') || str.includes('🛒')) return SVG_ICONS.sales;
+  if (str.includes('подар') || str.includes('gift') || str.includes('🎁')) return SVG_ICONS.gift;
+  if (str.includes('ед') || str.includes('продукт') || str.includes('food') || str.includes('кафе') || str.includes('ресторан') || str.includes('🍔')) return SVG_ICONS.food;
+  if (str.includes('транспорт') || str.includes('такси') || str.includes('car') || str.includes('авто') || str.includes('бензин') || str.includes('🚕')) return SVG_ICONS.transport;
+  if (str.includes('одежд') || str.includes('clothes') || str.includes('вещи') || str.includes('обувь') || str.includes('👕')) return SVG_ICONS.clothes;
+  if (str.includes('техник') || str.includes('tech') || str.includes('гаджет') || str.includes('ноутбук') || str.includes('телефон')) return SVG_ICONS.tech;
+  if (str.includes('игр') || str.includes('game') || str.includes('развлечен') || str.includes('кино') || str.includes('🎮')) return SVG_ICONS.games;
+  if (str.includes('учеб') || str.includes('study') || str.includes('курс') || str.includes('книг') || str.includes('образован') || str.includes('📚')) return SVG_ICONS.study;
+  if (str.includes('дом') || str.includes('home') || str.includes('аренд') || str.includes('квартир') || str.includes('коммунал') || str.includes('🏠')) return SVG_ICONS.home;
+  if (str.includes('связ') || str.includes('интернет') || str.includes('mobile') || str.includes('phone') || str.includes('📱')) return SVG_ICONS.mobile;
+  if (str.includes('карт') || str.includes('card') || str.includes('💳')) return SVG_ICONS.card;
+  if (str.includes('налич') || str.includes('cash') || str.includes('💵')) return SVG_ICONS.cash;
+  if (str.includes('банк') || str.includes('bank') || str.includes('🏦')) return SVG_ICONS.bank;
+  if (str.includes('крипт') || str.includes('валют') || str.includes('coin') || str.includes('🪙')) return SVG_ICONS.crypto;
+
+  return SVG_ICONS[nameOrKey] || SVG_ICONS.other;
+}
+
+function getIconHTML(iconStr) {
+  return getCategoryIcon(iconStr);
 }
 
 function createTxItemHTML(tx, allowDelete = false) {
   let sign = '';
   let colorClass = 'expense';
-  let iconKey = tx.category_icon || 'expense';
+  let iconKey = tx.category_name || tx.category_icon || 'expense';
 
   if (tx.type === 'income') {
     sign = '+';
     colorClass = 'income';
-    if (!tx.category_icon) iconKey = 'income';
   } else if (tx.type === 'expense') {
     sign = '-';
     colorClass = 'expense';
-    if (!tx.category_icon) iconKey = 'expense';
   } else if (tx.type === 'transfer') {
     sign = '';
     colorClass = 'transfer';
@@ -305,7 +327,7 @@ function createTxItemHTML(tx, allowDelete = false) {
   }
 
   const title = tx.category_name || tx.description || 'Операция';
-  const iconHTML = getIconHTML(iconKey);
+  const iconHTML = getCategoryIcon(iconKey);
   const meta = `${tx.account_name || 'Счет'} • ${formatDate(tx.created_at)}`;
 
   const deleteBtn = allowDelete
@@ -623,25 +645,25 @@ function clearAmount(inputId) {
 // ==================== VISUAL CHIPS & PILLS POPULATION ====================
 
 const DEFAULT_FALLBACK_INCOME = [
-  { id: '1', name: 'Работа', icon: '💼' },
-  { id: '2', name: 'Дизайн', icon: '🎨' },
-  { id: '3', name: 'Программирование', icon: '💻' },
-  { id: '4', name: 'Продажи', icon: '🛒' },
-  { id: '5', name: 'Подарок', icon: '🎁' },
-  { id: '6', name: 'Другое', icon: '➕' },
+  { id: '1', name: 'Работа', iconKey: 'work' },
+  { id: '2', name: 'Дизайн', iconKey: 'design' },
+  { id: '3', name: 'Программирование', iconKey: 'dev' },
+  { id: '4', name: 'Продажи', iconKey: 'sales' },
+  { id: '5', name: 'Подарок', iconKey: 'gift' },
+  { id: '6', name: 'Другое', iconKey: 'other' },
 ];
 
 const DEFAULT_FALLBACK_EXPENSE = [
-  { id: '1', name: 'Еда', icon: '🍔' },
-  { id: '2', name: 'Транспорт', icon: '🚕' },
-  { id: '3', name: 'Одежда', icon: '👕' },
-  { id: '4', name: 'Техника', icon: '💻' },
-  { id: '5', name: 'Игры', icon: '🎮' },
-  { id: '6', name: 'Учёба', icon: '📚' },
-  { id: '7', name: 'Дом', icon: '🏠' },
-  { id: '8', name: 'Связь', icon: '📱' },
-  { id: '9', name: 'Подарки', icon: '🎁' },
-  { id: '10', name: 'Другое', icon: '💳' },
+  { id: '1', name: 'Еда', iconKey: 'food' },
+  { id: '2', name: 'Транспорт', iconKey: 'transport' },
+  { id: '3', name: 'Одежда', iconKey: 'clothes' },
+  { id: '4', name: 'Техника', iconKey: 'tech' },
+  { id: '5', name: 'Игры', iconKey: 'games' },
+  { id: '6', name: 'Учёба', iconKey: 'study' },
+  { id: '7', name: 'Дом', iconKey: 'home' },
+  { id: '8', name: 'Связь', iconKey: 'mobile' },
+  { id: '9', name: 'Подарки', iconKey: 'gift' },
+  { id: '10', name: 'Другое', iconKey: 'other' },
 ];
 
 function selectCategoryChip(containerId, hiddenInputId, catId) {
@@ -678,10 +700,10 @@ function renderCategoryChips(containerId, hiddenInputId, categories, defaultSele
 
   container.innerHTML = categories.map(c => {
     const isSelected = String(c.id) === String(currentVal);
-    const icon = c.icon || (containerId.includes('income') ? '💰' : '🛍');
+    const iconSvg = getCategoryIcon(c.icon || c.name || c.iconKey);
     return `
       <div class="cat-chip ${isSelected ? 'selected' : ''}" data-id="${c.id}" onclick="selectCategoryChip('${containerId}', '${hiddenInputId}', '${c.id}')">
-        <span class="cat-chip-icon">${icon}</span>
+        <span class="cat-chip-icon">${iconSvg}</span>
         <span>${c.name}</span>
       </div>
     `;
@@ -695,8 +717,8 @@ function renderAccountPills(containerId, hiddenInputId, accounts, defaultSelecte
 
   const regularAccs = (accounts || []).filter(a => !a.is_savings);
   const activeList = regularAccs.length ? regularAccs : [
-    { id: 1, name: 'Карта', icon: '💳', balance: 0 },
-    { id: 2, name: 'Наличные', icon: '💵', balance: 0 }
+    { id: 1, name: 'Карта', icon: 'card', balance: 0 },
+    { id: 2, name: 'Наличные', icon: 'cash', balance: 0 }
   ];
 
   const currentVal = hiddenInput.value || defaultSelectedId || activeList[0].id;
@@ -704,9 +726,10 @@ function renderAccountPills(containerId, hiddenInputId, accounts, defaultSelecte
 
   container.innerHTML = activeList.map(a => {
     const isSelected = String(a.id) === String(currentVal);
+    const iconSvg = getCategoryIcon(a.icon || a.name || 'card');
     return `
       <div class="acc-pill ${isSelected ? 'selected' : ''}" data-id="${a.id}" onclick="selectAccountPill('${containerId}', '${hiddenInputId}', '${a.id}')">
-        <span>${a.icon || '💳'}</span>
+        <span class="acc-pill-icon">${iconSvg}</span>
         <div>
           <div class="acc-pill-name">${a.name}</div>
           <div class="acc-pill-balance">${formatMoney(a.balance)}</div>
@@ -787,6 +810,16 @@ function addAmount(inputId, delta) {
     const current = parseAmountInput(input.value);
     const total = current + delta;
     input.value = formatThousands(total);
+    updateHeroDisplay(input);
+  }
+}
+
+function clearAmount(inputId) {
+  haptic('light');
+  const input = document.getElementById(inputId);
+  if (input) {
+    input.value = '';
+    updateHeroDisplay(input);
   }
 }
 
@@ -841,10 +874,23 @@ async function handleFormSubmit(e, asyncCallback) {
 async function submitIncome(e) {
   await handleFormSubmit(e, async () => {
     const amount = parseAmountInput(document.getElementById('incomeAmount'));
-    const account_id = document.getElementById('incomeAccount').value;
-    const rawCat = document.getElementById('incomeCategory').value;
+    if (!amount || amount <= 0) {
+      showToast('Введите сумму дохода', 'error');
+      return;
+    }
+    let account_id = document.getElementById('incomeAccount')?.value;
+    if (!account_id && state.accounts && state.accounts.length) {
+      const reg = state.accounts.find(a => !a.is_savings) || state.accounts[0];
+      if (reg) account_id = reg.id;
+    }
+    if (!account_id) {
+      showToast('Выберите счёт', 'error');
+      return;
+    }
+
+    const rawCat = document.getElementById('incomeCategory')?.value;
     const category_id = rawCat && !isNaN(parseInt(rawCat)) ? parseInt(rawCat) : null;
-    const description = document.getElementById('incomeDesc').value;
+    const description = document.getElementById('incomeDesc')?.value;
 
     try {
       await apiFetch('/api/transactions/income', {
@@ -853,6 +899,7 @@ async function submitIncome(e) {
       });
       closeModal('modalIncome');
       document.getElementById('formIncome').reset();
+      clearAmount('incomeAmount');
       showToast('Доход успешно добавлен!');
       await loadSummary();
     } catch (err) {
@@ -864,10 +911,27 @@ async function submitIncome(e) {
 async function submitExpense(e) {
   await handleFormSubmit(e, async () => {
     const amount = parseAmountInput(document.getElementById('expenseAmount'));
-    const account_id = document.getElementById('expenseAccount').value;
-    const rawCat = document.getElementById('expenseCategory').value;
-    const category_id = rawCat && !isNaN(parseInt(rawCat)) ? parseInt(rawCat) : null;
-    const description = document.getElementById('expenseDesc').value;
+    if (!amount || amount <= 0) {
+      showToast('Введите сумму расхода', 'error');
+      return;
+    }
+    let account_id = document.getElementById('expenseAccount')?.value;
+    if (!account_id && state.accounts && state.accounts.length) {
+      const reg = state.accounts.find(a => !a.is_savings) || state.accounts[0];
+      if (reg) account_id = reg.id;
+    }
+    if (!account_id) {
+      showToast('Выберите счёт', 'error');
+      return;
+    }
+
+    let rawCat = document.getElementById('expenseCategory')?.value;
+    let category_id = rawCat && !isNaN(parseInt(rawCat)) ? parseInt(rawCat) : null;
+    if (!category_id && state.categories?.expense && state.categories.expense.length) {
+      category_id = state.categories.expense[0].id;
+    }
+
+    const description = document.getElementById('expenseDesc')?.value;
 
     try {
       await apiFetch('/api/transactions/expense', {
@@ -876,6 +940,7 @@ async function submitExpense(e) {
       });
       closeModal('modalExpense');
       document.getElementById('formExpense').reset();
+      clearAmount('expenseAmount');
       showToast('Расход записан!');
       await loadSummary();
     } catch (err) {
@@ -887,8 +952,21 @@ async function submitExpense(e) {
 async function submitTransfer(e) {
   await handleFormSubmit(e, async () => {
     const amount = parseAmountInput(document.getElementById('transferAmount'));
-    const from_account_id = document.getElementById('transferFromAccount').value;
-    const to_account_id = document.getElementById('transferToAccount').value;
+    if (!amount || amount <= 0) {
+      showToast('Введите сумму перевода', 'error');
+      return;
+    }
+    let from_account_id = document.getElementById('transferFromAccount')?.value;
+    let to_account_id = document.getElementById('transferToAccount')?.value;
+    const regularAccs = (state.accounts || []).filter(a => !a.is_savings);
+    if (!from_account_id && regularAccs.length > 0) from_account_id = regularAccs[0].id;
+    if (!to_account_id && regularAccs.length > 1) to_account_id = regularAccs[1].id;
+    else if (!to_account_id && regularAccs.length > 0) to_account_id = regularAccs[0].id;
+
+    if (!from_account_id || !to_account_id) {
+      showToast('Выберите счёта для перевода', 'error');
+      return;
+    }
 
     try {
       await apiFetch('/api/transactions/transfer', {
@@ -897,6 +975,7 @@ async function submitTransfer(e) {
       });
       closeModal('modalTransfer');
       document.getElementById('formTransfer').reset();
+      clearAmount('transferAmount');
       showToast('Перевод успешно выполнен!');
       await loadSummary();
     } catch (err) {
@@ -908,8 +987,17 @@ async function submitTransfer(e) {
 async function submitSaveDeposit(e) {
   await handleFormSubmit(e, async () => {
     const amount = parseAmountInput(document.getElementById('saveDepositAmount'));
-    const source_account_id = document.getElementById('saveDepositSource').value;
-    const description = document.getElementById('saveDepositDesc').value;
+    if (!amount || amount <= 0) {
+      showToast('Введите сумму для накоплений', 'error');
+      return;
+    }
+    let source_account_id = document.getElementById('saveDepositSource')?.value;
+    if (!source_account_id && state.accounts && state.accounts.length) {
+      const reg = state.accounts.find(a => !a.is_savings) || state.accounts[0];
+      if (reg) source_account_id = reg.id;
+    }
+
+    const description = document.getElementById('saveDepositDesc')?.value;
 
     try {
       const res = await apiFetch('/api/savings/deposit', {
@@ -918,6 +1006,7 @@ async function submitSaveDeposit(e) {
       });
       closeModal('modalSaveDeposit');
       document.getElementById('formSaveDeposit').reset();
+      clearAmount('saveDepositAmount');
       showToast('Отложено в накопления!');
       if (res.reached_goals && res.reached_goals.length) {
         showToast(`🎉 Достигнута цель: ${res.reached_goals.join(', ')}!`, 'success');
@@ -932,8 +1021,17 @@ async function submitSaveDeposit(e) {
 async function submitSaveWithdraw(e) {
   await handleFormSubmit(e, async () => {
     const amount = parseAmountInput(document.getElementById('saveWithdrawAmount'));
-    const dest_account_id = document.getElementById('saveWithdrawDest').value;
-    const description = document.getElementById('saveWithdrawDesc').value;
+    if (!amount || amount <= 0) {
+      showToast('Введите сумму снятия', 'error');
+      return;
+    }
+    let dest_account_id = document.getElementById('saveWithdrawDest')?.value;
+    if (!dest_account_id && state.accounts && state.accounts.length) {
+      const reg = state.accounts.find(a => !a.is_savings) || state.accounts[0];
+      if (reg) dest_account_id = reg.id;
+    }
+
+    const description = document.getElementById('saveWithdrawDesc')?.value;
 
     try {
       await apiFetch('/api/savings/withdraw', {
@@ -942,6 +1040,7 @@ async function submitSaveWithdraw(e) {
       });
       closeModal('modalSaveWithdraw');
       document.getElementById('formSaveWithdraw').reset();
+      clearAmount('saveWithdrawAmount');
       showToast('Деньги выведены из накоплений');
       await loadSummary();
     } catch (err) {

@@ -8,7 +8,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <!-- Chart.js for analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=4.0">
+  <link rel="stylesheet" href="/static/styles.css?v=5.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -387,7 +387,7 @@
           <div class="form-group">
             <label>Куда зачислить (Счёт)</label>
             <div class="account-pill-row" id="incomeAccountPills"></div>
-            <input type="hidden" id="incomeAccount" required>
+            <input type="hidden" id="incomeAccount">
           </div>
 
           <div class="form-group">
@@ -435,13 +435,13 @@
           <div class="form-group">
             <label>Списать со счёта</label>
             <div class="account-pill-row" id="expenseAccountPills"></div>
-            <input type="hidden" id="expenseAccount" required>
+            <input type="hidden" id="expenseAccount">
           </div>
 
           <div class="form-group">
             <label>Категория расхода</label>
             <div class="category-chip-grid" id="expenseCategoryChips"></div>
-            <input type="hidden" id="expenseCategory" required>
+            <input type="hidden" id="expenseCategory">
           </div>
 
           <div class="form-group">
@@ -475,13 +475,13 @@
           <div class="form-group">
             <label>Откуда списать</label>
             <div class="account-pill-row" id="transferFromAccountPills"></div>
-            <input type="hidden" id="transferFromAccount" required>
+            <input type="hidden" id="transferFromAccount">
           </div>
 
           <div class="form-group">
             <label>Куда перевести</label>
             <div class="account-pill-row" id="transferToAccountPills"></div>
-            <input type="hidden" id="transferToAccount" required>
+            <input type="hidden" id="transferToAccount">
           </div>
 
           <button type="submit" class="btn-submit btn-blue">Перевести</button>
@@ -516,7 +516,7 @@
           <div class="form-group">
             <label>С какого счёта перевести</label>
             <div class="account-pill-row" id="saveDepositSourcePills"></div>
-            <input type="hidden" id="saveDepositSource" required>
+            <input type="hidden" id="saveDepositSource">
           </div>
 
           <div class="form-group">
@@ -550,7 +550,7 @@
           <div class="form-group">
             <label>На какой счёт зачислить</label>
             <div class="account-pill-row" id="saveWithdrawDestPills"></div>
-            <input type="hidden" id="saveWithdrawDest" required>
+            <input type="hidden" id="saveWithdrawDest">
           </div>
 
           <div class="form-group">
@@ -579,10 +579,26 @@
           <div class="form-group">
             <label>Иконка счёта</label>
             <div class="icon-selector">
-              <label class="icon-opt"><input type="radio" name="accIcon" value="💳" checked><span>💳 Карта</span></label>
-              <label class="icon-opt"><input type="radio" name="accIcon" value="💵"><span>💵 Наличные</span></label>
-              <label class="icon-opt"><input type="radio" name="accIcon" value="🏦"><span>🏦 Банк</span></label>
-              <label class="icon-opt"><input type="radio" name="accIcon" value="🪙"><span>🪙 Крипта/Валюта</span></label>
+              <label class="icon-opt">
+                <input type="radio" name="accIcon" value="card" checked>
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                <span>Карта</span>
+              </label>
+              <label class="icon-opt">
+                <input type="radio" name="accIcon" value="cash">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="3"></circle></svg>
+                <span>Наличные</span>
+              </label>
+              <label class="icon-opt">
+                <input type="radio" name="accIcon" value="bank">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 3l9 7H3l9-7z"></path></svg>
+                <span>Банк</span>
+              </label>
+              <label class="icon-opt">
+                <input type="radio" name="accIcon" value="crypto">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v12M9 9h6M9 15h6"></path></svg>
+                <span>Крипта</span>
+              </label>
             </div>
           </div>
 
@@ -628,22 +644,18 @@
     <div id="modalSalary" class="modal-backdrop">
       <div class="modal-card">
         <div class="modal-header">
-          <h3>Настройка дохода</h3>
+          <h3>Настройка дохода и цикла</h3>
           <button class="close-modal" onclick="closeModal('modalSalary')">✕</button>
         </div>
         <form id="formSalary" onsubmit="submitSalaryForm(event)">
           <div class="form-group">
-            <label>Ежемесячная зарплата (сум)</label>
-            <input type="text" inputmode="numeric" id="salaryMonthlyInput" class="form-input amount-input" placeholder="5 000 000">
-            <small class="form-help">Используется для расчёта % нагрузки ваших целей на бюджет.</small>
+            <label>Ваш месячный доход (сум)</label>
+            <input type="text" inputmode="numeric" id="salaryMonthlyInput" class="form-input amount-input" placeholder="0" required>
           </div>
 
           <div class="form-group">
-            <label>Периодичность выплат</label>
-            <select id="salaryCycleInput" class="form-select">
-              <option value="30">1 раз в месяц (30 дней)</option>
-              <option value="15">2 раза в месяц (каждые 15 дней / аванс+зарплата)</option>
-            </select>
+            <label>Периодичность получения дохода (в днях)</label>
+            <input type="number" id="salaryCycleInput" class="form-input" placeholder="30" value="30" min="1" max="365" required>
           </div>
 
           <button type="submit" class="btn-submit btn-accent">Сохранить</button>
@@ -664,7 +676,7 @@
 
           <div class="form-group" id="debtPersonGroup">
             <label>Имя человека</label>
-            <input type="text" id="debtPersonName" class="form-input" placeholder="Имя или контакт" maxlength="40">
+            <input type="text" id="debtPersonName" class="form-input" placeholder="Например: Алишер" maxlength="50">
           </div>
 
           <div class="form-group">
@@ -673,7 +685,7 @@
           </div>
 
           <div class="form-group">
-            <label id="debtAccountLabel">Счёт для списания/зачисления</label>
+            <label id="debtAccountLabel">Счёт для операции</label>
             <select id="debtAccount" class="form-select" required></select>
           </div>
 
@@ -706,6 +718,6 @@
 
   </div>
 
-  <script src="/static/app.js?v=4.0"></script>
+  <script src="/static/app.js?v=5.0"></script>
 </body>
 </html>
