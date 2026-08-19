@@ -1342,25 +1342,47 @@ body.light-theme .form-input:focus, body.light-theme .form-select:focus {
 .icon-selector {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
 
 .icon-opt {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  background: var(--glass-bg-sub);
+  background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  color: var(--text-primary);
-  padding: 10px 12px;
-  border-radius: var(--radius-xs);
+  box-shadow: var(--glass-inset);
+  color: var(--text-secondary);
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
   font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
 }
+
+.icon-opt input[type="radio"] {
+  display: none;
+}
+
+.icon-opt svg {
+  display: block;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.icon-opt:active {
+  transform: scale(0.96);
+}
+
 .icon-opt:has(input:checked) {
-  border-color: var(--text-primary);
+  border: 1.5px solid var(--text-primary);
   background: var(--glass-bg-hover);
+  color: var(--text-primary);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.15), var(--glass-inset);
 }
 
 .btn-submit {
