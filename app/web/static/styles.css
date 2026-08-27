@@ -593,8 +593,12 @@ body {
   background: var(--glass-bg);
 }
 
-.btn-primary-sm, .btn-secondary-sm {
-  padding: 6px 14px;
+.btn-primary-sm, .btn-secondary-sm, .btn-xs-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 13px;
   border-radius: var(--radius-xs);
   font-size: 12px;
   font-weight: 600;
@@ -602,19 +606,22 @@ body {
   border: none;
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: inherit;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .btn-primary-sm {
   background: var(--text-primary);
   color: var(--bg);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  font-weight: 700;
 }
 .btn-primary-sm:active {
   opacity: 0.85;
   transform: scale(0.96);
 }
 
-.btn-secondary-sm {
+.btn-secondary-sm, .btn-xs-outline {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-inset);
@@ -622,33 +629,26 @@ body {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
-.btn-secondary-sm:active {
+.btn-secondary-sm:hover, .btn-xs-outline:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-light);
+}
+.btn-secondary-sm:active, .btn-xs-outline:active {
   background: var(--glass-bg-hover);
   transform: scale(0.96);
 }
 
-.btn-xs-outline {
+.budget-load-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-xs);
+  background: var(--glass-bg-sub);
+  border: 1px solid var(--glass-border);
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-inset);
+  justify-content: center;
   color: var(--text-primary);
-  border-radius: var(--radius-xs);
-  padding: 5px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  font-family: inherit;
-}
-.btn-xs-outline:active {
-  transform: scale(0.95);
-  background: var(--glass-bg-hover);
-  border-color: var(--glass-border-light);
+  flex-shrink: 0;
 }
 
 /* ===== ACCOUNTS SCROLL ===== */
@@ -899,21 +899,44 @@ body.light-theme .progress-bar-container {
 .savings-actions { display: flex; gap: 8px; }
 
 .btn-sm {
-  padding: 8px 14px;
+  padding: 7px 13px;
   border-radius: var(--radius-xs);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   border: none;
-  transition: all 0.15s;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  white-space: nowrap;
 }
-.btn-sm:active { opacity: 0.8; }
+.btn-sm:active {
+  transform: scale(0.96);
+}
 
-.btn-accent { background: var(--text-primary); color: var(--bg); }
+.btn-accent {
+  background: var(--text-primary);
+  color: var(--bg);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.btn-accent:active {
+  opacity: 0.85;
+}
+
 .btn-outline {
-  background: transparent;
+  background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset);
   color: var(--text-primary);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.btn-outline:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-light);
+}
+.btn-outline:active {
+  background: var(--glass-bg-hover);
 }
 
 .goals-list {
