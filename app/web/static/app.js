@@ -577,7 +577,7 @@ function renderLoadAnalysis(a) {
 
   if (breakdownContainer) {
     if (!a.goals || !a.goals.length) {
-      breakdownContainer.innerHTML = '<div style="font-size: 11px; color: var(--text-tertiary); text-align: center; padding: 6px 0;">Нет активных целей накоплений. Создайте цель во вкладке «Счета».</div>';
+      breakdownContainer.innerHTML = '<div style="font-size: 11px; color: var(--text-tertiary); text-align: center; padding: 6px 0;">Нет активных целей накоплений. Нажмите «+ Цель», чтобы добавить цель.</div>';
       return;
     }
 

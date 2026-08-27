@@ -1838,6 +1838,14 @@ body.light-theme .form-input:focus, body.light-theme .form-select:focus {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 14px;
+  gap: 8px;
+}
+
+.budget-load-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .budget-load-title {
