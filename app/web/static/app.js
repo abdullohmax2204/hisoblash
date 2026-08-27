@@ -577,7 +577,7 @@ function renderLoadAnalysis(a) {
 
   if (breakdownContainer) {
     if (!a.goals || !a.goals.length) {
-      breakdownContainer.innerHTML = '';
+      breakdownContainer.innerHTML = '<div style="font-size: 11px; color: var(--text-tertiary); text-align: center; padding: 6px 0;">Нет активных целей накоплений. Создайте цель во вкладке «Счета».</div>';
       return;
     }
 
@@ -587,11 +587,11 @@ function renderLoadAnalysis(a) {
         <div class="load-goal-item">
           <div>
             <div class="load-goal-name">${g.name}</div>
-            <div class="load-goal-details" style="text-align: left; font-size: 11px; color: var(--text-muted);">${dateInfo}</div>
+            <div class="load-goal-details" style="text-align: left; font-size: 11px; color: var(--text-tertiary); margin-top: 2px;">${dateInfo}</div>
           </div>
           <div class="load-goal-details">
             <div class="load-goal-req">${formatMoney(g.required_monthly)}/мес</div>
-            <div style="font-size: 11px; color: var(--text-muted);">(${formatMoney(g.required_15day)}/15дн)</div>
+            <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 2px;">(${formatMoney(g.required_15day)}/15дн)</div>
           </div>
         </div>
       `;
@@ -1239,8 +1239,14 @@ async function submitNewGoal(e) {
 
 function openSalaryModal() {
   const currentVal = state.summary?.user?.monthly_salary;
-  if (currentVal) {
-    document.getElementById('salaryMonthlyInput').value = formatThousands(currentVal);
+  const inputEl = document.getElementById('salaryMonthlyInput');
+  if (inputEl) {
+    inputEl.value = currentVal ? formatThousands(currentVal) : '';
+  }
+  const cycleVal = state.summary?.user?.pay_cycle_days || 30;
+  const cycleEl = document.getElementById('salaryCycleInput');
+  if (cycleEl) {
+    cycleEl.value = cycleVal;
   }
   openModal('modalSalary');
 }
@@ -1248,7 +1254,7 @@ function openSalaryModal() {
 async function submitSalaryForm(e) {
   await handleFormSubmit(e, async () => {
     const monthly_salary = parseAmountInput(document.getElementById('salaryMonthlyInput'));
-    const pay_cycle_days = document.getElementById('salaryCycleInput').value;
+    const pay_cycle_days = parseInt(document.getElementById('salaryCycleInput')?.value || '30', 10);
 
     try {
       const analysis = await apiFetch('/api/user/salary', {
@@ -1257,7 +1263,13 @@ async function submitSalaryForm(e) {
       });
       closeModal('modalSalary');
       showToast('Настройки дохода сохранены!');
+      if (state.summary) {
+        if (!state.summary.user) state.summary.user = {};
+        state.summary.user.monthly_salary = monthly_salary;
+        state.summary.user.pay_cycle_days = pay_cycle_days;
+      }
       renderLoadAnalysis(analysis);
+      await loadSummary();
     } catch (err) {
       showToast(err.message, 'error');
     }

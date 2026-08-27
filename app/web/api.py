@@ -222,6 +222,7 @@ async def handle_summary(request: web.Request) -> web.Response:
                 "id": g["goal"].id,
                 "name": g["goal"].name,
                 "target_amount": g["target"],
+                "target_date": g["goal"].target_date.isoformat() if g["goal"].target_date else None,
                 "is_funded": g["is_funded"],
                 "pct": g["pct"],
             }
@@ -248,6 +249,12 @@ async def handle_summary(request: web.Request) -> web.Response:
         data = {
             "user_id": user_id,
             "user_name": user_obj.name if user_obj else f"User #{user_id}",
+            "user": {
+                "id": user_obj.id,
+                "name": user_obj.name,
+                "monthly_salary": user_obj.monthly_salary,
+                "pay_cycle_days": user_obj.pay_cycle_days,
+            } if user_obj else None,
             "available_funds": summary["available_funds"],
             "savings_balance": summary["savings_balance"],
             "debts_given": summary["debts_given"],

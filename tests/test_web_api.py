@@ -75,6 +75,20 @@ async def test_web_app_endpoints(session, test_user, test_accounts, test_categor
         summary = await resp.json()
         assert "total_capital" in summary
         assert "available_funds" in summary
+        assert "user" in summary
+        assert "goals" in summary
+
+        # Test Update Salary
+        resp = await client.post("/api/user/salary", json={"monthly_salary": 8000000, "pay_cycle_days": 30})
+        assert resp.status == 200
+        salary_load = await resp.json()
+        assert salary_load["monthly_income"] == 8000000
+        assert salary_load["stress_level"] in ("green", "yellow", "red")
+
+        resp = await client.get("/api/savings/load-analysis")
+        assert resp.status == 200
+        load_res = await resp.json()
+        assert load_res["monthly_income"] == 8000000
 
         resp = await client.get("/api/categories")
         assert resp.status == 200
