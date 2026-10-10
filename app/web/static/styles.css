@@ -124,52 +124,6 @@ body {
   }
 }
 
-/* ===== HEADER ===== */
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: max(12px, env(safe-area-inset-top, 12px)) 16px 12px 16px;
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  background: var(--glass-bg);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border-bottom: 1px solid var(--glass-border);
-  box-shadow: var(--glass-inset);
-}
-
-@media (min-width: 640px) {
-  .app-header {
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--glass-border);
-    margin: 0 16px 14px 16px;
-    padding: 12px 16px;
-  }
-}
-
-/* ===== APP HEADER BRAND & LANGUAGE SWITCHER ===== */
-.app-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  user-select: none;
-}
-
-.app-brand-icon {
-  font-size: 18px;
-  line-height: 1;
-}
-
-.app-brand-name {
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: -0.4px;
-  color: var(--text-primary);
-  font-family: 'Outfit', -apple-system, sans-serif;
-}
 
 
 /* Capital Header Actions (Eye Toggle + Fullscreen Button) */
@@ -372,7 +326,7 @@ body {
 /* ===== MAIN CONTENT ===== */
 .main-content {
   flex: 1;
-  padding: 16px 16px;
+  padding: max(16px, env(safe-area-inset-top, 16px)) 16px 16px 16px;
 }
 
 .tab-content { display: none; animation: glassFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
