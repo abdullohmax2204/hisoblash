@@ -131,7 +131,7 @@ export function isMobileDevice() {
     if (['android', 'ios', 'mobile'].includes(p)) return true;
     if (['tdesktop', 'macos', 'web', 'weba', 'webk'].includes(p)) return false;
   }
-  return window.innerWidth <= 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
 export function toggleFullscreenMode() {
@@ -159,6 +159,11 @@ export function toggleFullscreenMode() {
 }
 
 export function updateFullscreenBtnState() {
+  const isFull = (tg && tg.isFullscreen) || !!document.fullscreenElement;
+  if (typeof document !== 'undefined' && document.body) {
+    document.body.classList.toggle('is-fullscreen', isFull);
+  }
+
   const btn = document.getElementById('toggleFullscreenBtn');
   if (!btn) return;
 
@@ -168,7 +173,6 @@ export function updateFullscreenBtnState() {
   }
 
   btn.style.display = 'flex';
-  const isFull = (tg && tg.isFullscreen) || !!document.fullscreenElement;
 
   if (isFull) {
     btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>`;
@@ -177,6 +181,11 @@ export function updateFullscreenBtnState() {
     btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`;
     btn.title = 'Полноэкранный режим (F)';
   }
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('fullscreenchange', updateFullscreenBtnState);
+  window.addEventListener('resize', updateFullscreenBtnState);
 }
 
 export function isLightBg(hex) {

@@ -8,7 +8,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <!-- Chart.js for analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=7.0">
+  <link rel="stylesheet" href="/static/styles.css?v=8.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -22,7 +22,10 @@
       
       <!-- TAB 1: OVERVIEW (DASHBOARD) -->
       <section id="tab-overview" class="tab-content active">
-        <!-- Capital Hero Card -->
+        <div class="overview-layout">
+          <!-- Left / Main Column (Desktop) -->
+          <div class="overview-col-main">
+            <!-- Capital Hero Card -->
         <div class="capital-card">
           <div class="capital-header">
             <span class="label" data-i18n="total_capital">ОБЩИЙ КАПИТАЛ</span>
@@ -115,7 +118,10 @@
         <div class="accounts-scroll" id="accountsList">
           <!-- Accounts injected here -->
         </div>
+      </div>
 
+      <!-- Right / Secondary Column (Desktop) -->
+      <div class="overview-col-side">
         <!-- BUDGET LOAD ANALYSIS WIDGET (Main Overview) -->
         <div class="budget-load-card" id="budgetLoadWidget">
           <div class="budget-load-header">
@@ -172,15 +178,19 @@
           </div>
         </div>
 
-        <!-- Recent Transactions -->
-        <div class="section-title-bar">
-          <h3>Последние операции</h3>
-          <button class="link-btn" onclick="switchTab('tab-history')">Все</button>
+        <!-- Recent Transactions Card -->
+        <div class="recent-tx-card">
+          <div class="section-title-bar">
+            <h3>Последние операции</h3>
+            <button class="link-btn" onclick="switchTab('tab-history')">Все</button>
+          </div>
+          <div class="tx-list" id="recentTxList">
+            <div class="empty-state">Загрузка операций...</div>
+          </div>
         </div>
-        <div class="tx-list" id="recentTxList">
-          <div class="empty-state">Загрузка операций...</div>
-        </div>
-      </section>
+      </div>
+    </div>
+  </section>
 
       <!-- TAB 2: ACCOUNTS & SAVINGS -->
       <section id="tab-accounts" class="tab-content">
@@ -242,11 +252,13 @@
 
         <div class="chart-card">
           <h4>Расходы по категориям</h4>
-          <div class="chart-container">
-            <canvas id="categoriesChart"></canvas>
-          </div>
-          <div class="top-categories-list" id="topCategoriesList">
-            <!-- Top categories list -->
+          <div class="chart-content-grid">
+            <div class="chart-container">
+              <canvas id="categoriesChart"></canvas>
+            </div>
+            <div class="top-categories-list" id="topCategoriesList">
+              <!-- Top categories list -->
+            </div>
           </div>
         </div>
       </section>
