@@ -227,6 +227,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
+  // Close open modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const openModal = document.querySelector('.modal-backdrop.open');
+      if (openModal) {
+        closeModal(openModal.id);
+      }
+    }
+  });
+
   // Bottom Navigation click handlers
   document.querySelectorAll('.nav-item').forEach(btn => {
     btn.addEventListener('click', () => {
