@@ -689,6 +689,8 @@ body.is-fullscreen .app-container {
   display: block;
 }
 
+/* ===== EMPTY STATE & INTERACTIVE CARDS DESIGN SYSTEM (Apple Frosted Glass) ===== */
+
 /* Account Empty Interactive Card */
 .account-empty-card {
   width: 100%;
@@ -696,31 +698,57 @@ body.is-fullscreen .app-container {
   align-items: center;
   gap: 14px;
   background: var(--glass-bg-sub);
-  border: 1px dashed var(--glass-border-light);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset), 0 4px 16px rgba(0, 0, 0, 0.1);
   border-radius: var(--radius-lg);
   padding: 16px 18px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.account-empty-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-border-light), transparent);
 }
 
 .account-empty-card:hover {
   background: var(--glass-bg-hover);
-  border-color: var(--text-primary);
+  border-color: var(--glass-border-light);
   transform: translateY(-2px);
+  box-shadow: var(--glass-inset), 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.account-empty-card:active {
+  transform: scale(0.985);
+  background: var(--glass-bg-hover);
 }
 
 .account-empty-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-primary);
   flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.account-empty-card:hover .account-empty-icon {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--text-primary);
 }
 
 .account-empty-info {
@@ -728,17 +756,20 @@ body.is-fullscreen .app-container {
   flex-direction: column;
   gap: 3px;
   text-align: left;
+  min-width: 0;
 }
 
 .account-empty-title {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.2px;
 }
 
 .account-empty-sub {
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--text-tertiary);
+  line-height: 1.35;
 }
 
 /* Transaction Empty State */
@@ -748,35 +779,53 @@ body.is-fullscreen .app-container {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 28px 16px;
-  gap: 6px;
+  padding: 32px 18px;
+  gap: 8px;
   background: var(--glass-bg-sub);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset);
   border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tx-empty-state::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-border-light), transparent);
 }
 
 .tx-empty-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-tertiary);
-  margin-bottom: 4px;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
 }
 
 .tx-empty-title {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.2px;
 }
 
 .tx-empty-sub {
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--text-tertiary);
+  max-width: 260px;
+  line-height: 1.35;
 }
 
 .accounts-scroll .account-empty-card,
@@ -800,31 +849,57 @@ body.is-fullscreen .app-container {
   align-items: center;
   gap: 14px;
   background: var(--glass-bg-sub);
-  border: 1px dashed var(--glass-border-light);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset), 0 4px 16px rgba(0, 0, 0, 0.1);
   border-radius: var(--radius-lg);
   padding: 16px 18px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.goal-empty-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.35), transparent);
 }
 
 .goal-empty-card:hover {
   background: var(--glass-bg-hover);
-  border-color: var(--amber);
+  border-color: rgba(251, 191, 36, 0.45);
   transform: translateY(-2px);
+  box-shadow: var(--glass-inset), 0 8px 24px rgba(251, 191, 36, 0.12);
+}
+
+.goal-empty-card:active {
+  transform: scale(0.985);
+  background: var(--glass-bg-hover);
 }
 
 .goal-empty-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius);
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  box-shadow: var(--glass-inset);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--amber);
   flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.goal-empty-card:hover .goal-empty-icon {
+  transform: scale(1.05);
+  background: rgba(251, 191, 36, 0.18);
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.25);
 }
 
 .goal-empty-info {
@@ -832,17 +907,20 @@ body.is-fullscreen .app-container {
   flex-direction: column;
   gap: 3px;
   text-align: left;
+  min-width: 0;
 }
 
 .goal-empty-title {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.2px;
 }
 
 .goal-empty-sub {
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--text-tertiary);
+  line-height: 1.35;
 }
 
 /* Debt Empty State Card */
@@ -852,40 +930,66 @@ body.is-fullscreen .app-container {
   align-items: center;
   gap: 14px;
   background: var(--glass-bg-sub);
-  border: 1px dashed var(--glass-border-light);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset), 0 4px 16px rgba(0, 0, 0, 0.1);
   border-radius: var(--radius-lg);
   padding: 18px 20px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.debt-empty-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-border-light), transparent);
 }
 
 .debt-empty-card:hover {
   background: var(--glass-bg-hover);
-  border-color: var(--text-primary);
+  border-color: var(--glass-border-light);
   transform: translateY(-2px);
+  box-shadow: var(--glass-inset), 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.debt-empty-card:active {
+  transform: scale(0.985);
+  background: var(--glass-bg-hover);
 }
 
 .debt-empty-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: var(--radius-sm);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .debt-empty-icon.given {
   color: var(--green);
+  background: rgba(52, 211, 153, 0.1);
   border-color: rgba(52, 211, 153, 0.3);
 }
 
 .debt-empty-icon.taken {
   color: var(--blue);
+  background: rgba(56, 189, 248, 0.1);
   border-color: rgba(56, 189, 248, 0.3);
+}
+
+.debt-empty-card:hover .debt-empty-icon {
+  transform: scale(1.05);
 }
 
 .debt-empty-info {
@@ -893,17 +997,20 @@ body.is-fullscreen .app-container {
   flex-direction: column;
   gap: 3px;
   text-align: left;
+  min-width: 0;
 }
 
 .debt-empty-title {
   font-size: 14px;
   font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.2px;
 }
 
 .debt-empty-sub {
   font-size: 12px;
   color: var(--text-tertiary);
+  line-height: 1.35;
 }
 
 /* Debt Summary Bar */
@@ -912,11 +1019,14 @@ body.is-fullscreen .app-container {
   justify-content: space-between;
   align-items: center;
   background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-inset);
   border-radius: var(--radius);
   padding: 12px 16px;
   margin-bottom: 14px;
+  box-sizing: border-box;
 }
 
 .debt-summary-label {
@@ -944,18 +1054,35 @@ body.is-fullscreen .app-container {
   gap: 8px;
   grid-column: 1 / -1;
   width: 100%;
+  background: var(--glass-bg-sub);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset);
+  border-radius: var(--radius-lg);
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-empty-state::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-border-light), transparent);
 }
 
 .chart-empty-icon {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
-  background: var(--glass-bg-sub);
+  border-radius: var(--radius);
+  background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
@@ -963,12 +1090,14 @@ body.is-fullscreen .app-container {
   font-size: 14px;
   font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.2px;
 }
 
 .chart-empty-sub {
   font-size: 12px;
   color: var(--text-tertiary);
   max-width: 280px;
+  line-height: 1.4;
 }
 
 /* Notification Empty State */
@@ -981,20 +1110,35 @@ body.is-fullscreen .app-container {
   padding: 36px 16px;
   gap: 8px;
   background: var(--glass-bg-sub);
-  border: 1px dashed var(--glass-border);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset);
   border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.notif-empty-state::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-border-light), transparent);
 }
 
 .notif-empty-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-inset);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
@@ -1002,11 +1146,14 @@ body.is-fullscreen .app-container {
   font-size: 14px;
   font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.2px;
 }
 
 .notif-empty-sub {
   font-size: 12px;
   color: var(--text-tertiary);
+  max-width: 280px;
+  line-height: 1.4;
 }
 
 /* ===== SECTION HEADERS ===== */
@@ -1317,12 +1464,25 @@ body.light-theme .progress-bar-container {
 .empty-state {
   text-align: center;
   padding: 32px 18px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   font-size: 13px;
   background: var(--glass-bg-sub);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--glass-inset);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.empty-state::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-border-light), transparent);
 }
 
 /* ===== TAB 2: ACCOUNTS & SAVINGS ===== */
