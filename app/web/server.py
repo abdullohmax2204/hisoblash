@@ -29,9 +29,13 @@ async def cors_middleware(request: web.Request, handler):
 
 
 async def handle_index(request: web.Request) -> web.FileResponse:
-    """Serve Mini App main entry HTML file."""
+    """Serve Mini App main entry HTML file with anti-cache headers."""
     index_path = STATIC_DIR / "index.html"
-    return web.FileResponse(index_path)
+    response = web.FileResponse(index_path)
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 async def handle_health(request: web.Request) -> web.Response:
