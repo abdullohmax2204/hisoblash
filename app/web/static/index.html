@@ -8,7 +8,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <!-- Chart.js for analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=8.0">
+  <link rel="stylesheet" href="/static/styles.css?v=9.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -110,15 +110,30 @@
           </button>
         </div>
 
-        <!-- Accounts Horizontal Carousel -->
-        <div class="section-title-bar">
-          <h3>Мои Счета</h3>
-          <button class="link-btn" onclick="openModal('modalNewAccount')">+ Новый счет</button>
-        </div>
-        <div class="accounts-scroll" id="accountsList">
-          <!-- Accounts injected here -->
-        </div>
-      </div>
+            <!-- Accounts Card -->
+            <div class="overview-accounts-card">
+              <div class="section-title-bar">
+                <h3>Мои Счета</h3>
+                <button class="link-btn" onclick="openModal('modalNewAccount')">+ Новый счет</button>
+              </div>
+              <div class="accounts-scroll" id="accountsList">
+                <div class="account-empty-card" onclick="openModal('modalNewAccount')">
+                  <div class="account-empty-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+                      <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                      <line x1="2" y1="10" x2="22" y2="10"></line>
+                      <line x1="12" y1="13" x2="12" y2="17"></line>
+                      <line x1="10" y1="15" x2="14" y2="15"></line>
+                    </svg>
+                  </div>
+                  <div class="account-empty-info">
+                    <div class="account-empty-title">+ Добавить первый счет</div>
+                    <div class="account-empty-sub">Uzcard, Humo, Visa, Наличные</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
       <!-- Right / Secondary Column (Desktop) -->
       <div class="overview-col-side">
@@ -185,7 +200,16 @@
             <button class="link-btn" onclick="switchTab('tab-history')">Все</button>
           </div>
           <div class="tx-list" id="recentTxList">
-            <div class="empty-state">Загрузка операций...</div>
+            <div class="tx-empty-state">
+              <div class="tx-empty-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+                  <polyline points="12 8 12 12 14 14"></polyline>
+                  <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"></path>
+                </svg>
+              </div>
+              <div class="tx-empty-title">Нет недавних операций</div>
+              <div class="tx-empty-sub">Добавьте расход или доход кнопками выше</div>
+            </div>
           </div>
         </div>
       </div>

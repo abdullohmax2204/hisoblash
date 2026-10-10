@@ -47,6 +47,7 @@ import {
   openGiveDebtModal,
   openTakeDebtModal,
   openReturnDebtModal,
+} from './views/debts.js';
 import { loadHistory, loadHistoryPage, deleteTransaction } from './views/history.js';
 import { t, setLanguage, getLanguage } from './i18n.js';
 import {

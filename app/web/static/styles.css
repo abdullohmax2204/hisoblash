@@ -378,27 +378,29 @@ body.is-fullscreen .app-container {
   gap: 0;
 }
 
-.recent-tx-card {
+.recent-tx-card,
+.overview-accounts-card {
   background: transparent;
 }
 
 @media (min-width: 960px) {
   .overview-layout {
     display: grid;
-    grid-template-columns: 1.16fr 0.84fr;
+    grid-template-columns: 1.15fr 0.85fr;
     gap: 22px;
     align-items: start;
   }
 
   .overview-col-main {
-    gap: 2px;
+    gap: 16px;
   }
 
   .overview-col-side {
     gap: 16px;
   }
 
-  .recent-tx-card {
+  .recent-tx-card,
+  .overview-accounts-card {
     background: var(--glass-bg);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -408,6 +410,7 @@ body.is-fullscreen .app-container {
     padding: 18px 20px;
     display: flex;
     flex-direction: column;
+    min-height: 220px;
   }
 
   .recent-tx-card .tx-list {
@@ -589,16 +592,156 @@ body.is-fullscreen .app-container {
 }
 
 .action-btn .btn-icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--glass-bg-sub);
+  border: 1px solid var(--glass-border);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   color: var(--text-primary);
+}
+
+.action-btn .btn-icon-badge.icon-income {
+  color: var(--green);
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.25);
+}
+
+.action-btn .btn-icon-badge.icon-expense {
+  color: var(--red);
+  background: rgba(251, 113, 133, 0.12);
+  border-color: rgba(251, 113, 133, 0.25);
+}
+
+.action-btn .btn-icon-badge.icon-transfer {
+  color: var(--blue);
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+.action-btn .btn-icon-badge.icon-save {
+  color: var(--amber);
+  background: rgba(251, 191, 36, 0.12);
+  border-color: rgba(251, 191, 36, 0.25);
+}
+
+.action-btn:hover .btn-icon-badge.icon-income {
+  background: rgba(52, 211, 153, 0.22);
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.3);
+}
+
+.action-btn:hover .btn-icon-badge.icon-expense {
+  background: rgba(251, 113, 133, 0.22);
+  box-shadow: 0 0 16px rgba(251, 113, 133, 0.3);
+}
+
+.action-btn:hover .btn-icon-badge.icon-transfer {
+  background: rgba(56, 189, 248, 0.22);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.3);
+}
+
+.action-btn:hover .btn-icon-badge.icon-save {
+  background: rgba(251, 191, 36, 0.22);
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.3);
 }
 
 .action-btn span {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-secondary);
+}
+
+/* Account Empty Interactive Card */
+.account-empty-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--glass-bg-sub);
+  border: 1px dashed var(--glass-border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.account-empty-card:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.account-empty-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.account-empty-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+}
+
+.account-empty-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.account-empty-sub {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* Transaction Empty State */
+.tx-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 28px 16px;
+  gap: 6px;
+  background: var(--glass-bg-sub);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+}
+
+.tx-empty-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+
+.tx-empty-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tx-empty-sub {
+  font-size: 11px;
+  color: var(--text-tertiary);
 }
 
 /* ===== SECTION HEADERS ===== */
@@ -896,11 +1039,13 @@ body.light-theme .progress-bar-container {
 /* ===== EMPTY STATE ===== */
 .empty-state {
   text-align: center;
-  padding: 36px 16px;
+  padding: 32px 18px;
   color: var(--text-tertiary);
   font-size: 13px;
-  border: 1px dashed var(--glass-border);
+  background: var(--glass-bg-sub);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--glass-inset);
 }
 
 /* ===== TAB 2: ACCOUNTS & SAVINGS ===== */

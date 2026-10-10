@@ -65,7 +65,18 @@ export function renderRecentTx(transactions) {
   const container = document.getElementById('recentTxList');
   if (!container) return;
   if (!transactions.length) {
-    container.innerHTML = '<div class="empty-state">Нет недавних операций</div>';
+    container.innerHTML = `
+      <div class="tx-empty-state">
+        <div class="tx-empty-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+            <polyline points="12 8 12 12 14 14"></polyline>
+            <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"></path>
+          </svg>
+        </div>
+        <div class="tx-empty-title">Нет недавних операций</div>
+        <div class="tx-empty-sub">Добавьте расход или доход кнопками выше</div>
+      </div>
+    `;
     return;
   }
   container.innerHTML = transactions.map(tx => createTxItemHTML(tx)).join('');
@@ -125,8 +136,25 @@ export function renderAccountsList() {
     </div>
   `).join('');
 
-  if (scrollContainer) scrollContainer.innerHTML = html || '<div class="empty-state">Нет счетов</div>';
-  if (allGrid) allGrid.innerHTML = html || '<div class="empty-state">Нет счетов</div>';
+  const emptyHTML = `
+    <div class="account-empty-card" onclick="openModal('modalNewAccount')">
+      <div class="account-empty-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+          <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+          <line x1="2" y1="10" x2="22" y2="10"></line>
+          <line x1="12" y1="13" x2="12" y2="17"></line>
+          <line x1="10" y1="15" x2="14" y2="15"></line>
+        </svg>
+      </div>
+      <div class="account-empty-info">
+        <div class="account-empty-title">+ Добавить первый счет</div>
+        <div class="account-empty-sub">Uzcard, Humo, Visa, Наличные</div>
+      </div>
+    </div>
+  `;
+
+  if (scrollContainer) scrollContainer.innerHTML = html || emptyHTML;
+  if (allGrid) allGrid.innerHTML = html || emptyHTML;
 
   populateAccountDropdowns();
 }
