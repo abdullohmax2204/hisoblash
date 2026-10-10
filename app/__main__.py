@@ -8,6 +8,7 @@ import sys
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiogram.exceptions import TelegramUnauthorizedError
 from aiogram.fsm.storage.memory import MemoryStorage
 
 import aiohttp
@@ -136,8 +137,14 @@ async def main() -> None:
     try:
         logger.info("Bot is running. Press Ctrl+C to stop.")
         # Delete webhook + start polling
-        await bot.delete_webhook(drop_pending_updates=True)
-        await dp.start_polling(bot)
+        try:
+            await bot.delete_webhook(drop_pending_updates=True)
+            await dp.start_polling(bot)
+        except TelegramUnauthorizedError as e:
+            logger.error("CRITICAL: Telegram Bot Token is unauthorized or revoked (%s)! Please update BOT_TOKEN in your Render Environment settings.", e)
+            # Keep web runner running so WebApp stays online and healthchecks pass
+            while True:
+                await asyncio.sleep(3600)
     finally:
         if keep_alive_handle is not None:
             keep_alive_handle.cancel()
