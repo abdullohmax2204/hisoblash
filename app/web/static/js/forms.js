@@ -5,8 +5,8 @@
 import { state } from './state.js';
 import { apiFetch } from './api.js';
 import { showToast } from './toast.js';
-import { parseAmountInput, clearAmount, formatThousands, haptic } from './utils.js';
-import { openModal, closeModal } from './components/modals.js';
+import { parseAmountInput, formatThousands, haptic } from './utils.js';
+import { openModal, closeModal, clearAmount } from './components/modals.js';
 import { renderLoadAnalysis } from './views/overview.js';
 
 export async function handleFormSubmit(e, asyncCallback) {

@@ -196,7 +196,7 @@ document.addEventListener('keydown', (e) => {
 
 // ==================== APP INITIALIZATION ====================
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function initApp() {
   if (tg) {
     try {
       tg.ready?.();
@@ -267,4 +267,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load initial domain data
   await loadSummary();
   await loadCategories();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
