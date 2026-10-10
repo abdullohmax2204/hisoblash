@@ -180,36 +180,62 @@ async def test_web_app_endpoints(session, test_user, test_accounts, test_categor
         history = await resp.json()
         assert len(history["transactions"]) > 0
 
-        # 9. Multi-User Profile Switcher API
+        # 9. Single Master Profile API
         resp = await client.get("/api/users")
         assert resp.status == 200
         users_data = await resp.json()
         assert "users" in users_data
+        assert len(users_data["users"]) == 1
         assert "current_user_id" in users_data
 
+        # Multi-user profile creation is disabled for personal finance
         resp = await client.post("/api/users/create", json={"name": "Тестовый профиль 2"})
-        assert resp.status == 201
-        new_profile = await resp.json()
-        assert new_profile["name"] == "Тестовый профиль 2"
-        new_profile_id = new_profile["id"]
+        assert resp.status == 400
 
-        # Switch to new profile via header X-Profile-Id
-        resp = await client.get("/api/summary", headers={"X-Profile-Id": str(new_profile_id)})
-        assert resp.status == 200
-        new_summary = await resp.json()
-        assert new_summary["user_name"] == "Тестовый профиль 2"
-
-        # Rename profile
-        resp = await client.post("/api/users/rename", json={"user_id": new_profile_id, "name": "Работа"})
+        # Rename master profile
+        resp = await client.post("/api/users/rename", json={"name": "Мой бюджет"})
         assert resp.status == 200
         renamed = await resp.json()
-        assert renamed["name"] == "Работа"
+        assert renamed["name"] == "Мой бюджет"
 
-        # Delete profile
-        resp = await client.post("/api/users/delete", json={"user_id": new_profile_id})
+        # Cannot delete master profile
+        resp = await client.post("/api/users/delete", json={"user_id": 1})
+        assert resp.status == 400
+
+        # 10. Exchange Rates & Multi-Currency Projections
+        resp = await client.get("/api/rates")
         assert resp.status == 200
-        del_res = await resp.json()
-        assert del_res["success"] is True
+        rates_data = await resp.json()
+        assert "USD" in rates_data
+        assert "rate" in rates_data["USD"]
+
+        # Check projections in summary
+        resp = await client.get("/api/summary")
+        assert resp.status == 200
+        summary_rates = await resp.json()
+        assert "projections" in summary_rates
+        assert "USD" in summary_rates["projections"]
+        assert "EUR" in summary_rates["projections"]
+
+        # 11. Static files serving (Modular JS & SPA index)
+        resp = await client.get("/")
+        assert resp.status == 200
+        index_html = await resp.text()
+        assert "main.js" in index_html
+
+        for js_module in [
+            "main.js", "api.js", "state.js", "utils.js", "icons.js", "toast.js", "forms.js",
+            "components/modals.js", "views/overview.js", "views/accounts.js", "views/stats.js",
+            "views/debts.js", "views/history.js", "views/profiles.js",
+        ]:
+            resp = await client.get(f"/static/js/{js_module}")
+            assert resp.status == 200, f"Module {js_module} failed to load"
+            content = await resp.text()
+            assert len(content) > 50, f"Module {js_module} is unexpectedly small"
+
+        resp = await client.get("/static/styles.css")
+        assert resp.status == 200
 
     finally:
         await client.close()
+

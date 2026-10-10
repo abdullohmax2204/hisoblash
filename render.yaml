@@ -11,11 +11,21 @@ services:
         sync: false
       - key: ADMIN_USER_ID
         sync: false
+      - key: EMERGENCY_PASSWORD
+        sync: false
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+      - key: TURSO_SYNC_INTERVAL_SECONDS
+        value: 60
       - key: DATABASE_URL
         value: sqlite+aiosqlite:///./data/finance.db
       - key: ENVIRONMENT
         value: production
       - key: LOG_LEVEL
         value: INFO
+      - key: WEB_PORT
+        value: 10000
       - key: PYTHON_VERSION
         value: 3.12.0

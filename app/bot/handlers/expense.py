@@ -210,6 +210,7 @@ async def expense_account_selected(
             category_id=category_id,
             amount=amount,
             description=comment,
+            source="bot_keyboard",
         )
     except ValueError as e:
         await callback.message.edit_text(

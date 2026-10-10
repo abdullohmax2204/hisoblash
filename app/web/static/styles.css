@@ -470,6 +470,34 @@ body {
 }
 .eye-toggle:active { opacity: 0.6; }
 
+.currency-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--glass-bg-sub);
+  border: 1px solid var(--glass-border);
+  padding: 2px 4px;
+  border-radius: 20px;
+}
+
+.curr-pill {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.curr-pill.active {
+  background: var(--text-primary);
+  color: var(--bg);
+}
+
 .capital-amount {
   font-size: 32px;
   font-weight: 800;

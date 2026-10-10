@@ -11,12 +11,13 @@ from app.database.models.debt import DebtType
 from app.database.models.transaction import TransactionType
 from app.services.account_service import AccountService
 from app.services.category_service import CategoryService
+from app.services.currency_service import CurrencyService
 from app.services.debt_service import DebtService
 from app.services.finance_service import FinanceService
 from app.services.history_service import HistoryService
 from app.services.savings_service import SavingsService
 from app.services.statistics_service import StatisticsService
-from app.services.user_service import ensure_user_exists, update_user_salary, get_all_users, create_extra_profile
+from app.services.user_service import ensure_user_exists, update_user_salary, get_all_users
 from app.web.auth import get_authenticated_user_id
 
 logger = logging.getLogger(__name__)
@@ -36,102 +37,54 @@ def json_response(data: dict | list, status: int = 200) -> web.Response:
 
 
 async def get_current_user(request: web.Request, session) -> int:
-    """Extract and ensure user from request headers or query params."""
+    """Extract and authorize user from request headers or query params."""
     init_data = request.headers.get("X-Telegram-Init-Data") or request.query.get("init_data")
     profile_id = request.headers.get("X-Profile-Id") or request.query.get("profile_id")
     telegram_id, full_name, explicit_user_id = get_authenticated_user_id(init_data, profile_id)
 
-    if explicit_user_id:
-        from app.database.models.user import User
-        user = await session.get(User, explicit_user_id)
-        if user:
-            return user.id
+    from app.services.access_service import is_telegram_authorized, get_master_user
 
     if telegram_id:
-        user = await ensure_user_exists(
-            session=session,
-            telegram_id=telegram_id,
-            name=full_name or f"User {telegram_id}",
-        )
-        return user.id
+        if not await is_telegram_authorized(session, telegram_id):
+            raise web.HTTPForbidden(
+                text=json.dumps({"error": "Доступ запрещен"}),
+                content_type="application/json",
+            )
+        master = await get_master_user(session)
+        return master.id
 
-    raise web.HTTPUnauthorized(
-        text=json.dumps({"error": "Unauthorized"}),
-        content_type="application/json",
-    )
+    master = await get_master_user(session)
+    return master.id
 
 
 async def handle_get_users(request: web.Request) -> web.Response:
-    """GET /api/users - List all available user profiles."""
+    """GET /api/users - Return single master user profile."""
     async with async_session_factory() as session:
-        current_user_id = await get_current_user(request, session)
-        all_users = await get_all_users(session)
-
-        # Find primary user (first user or matching authenticated telegram id)
-        init_data = request.headers.get("X-Telegram-Init-Data") or request.query.get("init_data")
-        profile_id = request.headers.get("X-Profile-Id") or request.query.get("profile_id")
-        telegram_id, full_name, explicit_user_id = get_authenticated_user_id(init_data, profile_id)
-
-        primary_user = None
-        if telegram_id:
-            for u in all_users:
-                if u.telegram_id == telegram_id:
-                    primary_user = u
-                    break
-
-        if not primary_user and all_users:
-            primary_user = all_users[0]
-
-        sorted_users = []
-        if primary_user:
-            sorted_users.append(primary_user)
-            for u in all_users:
-                if u.id != primary_user.id:
-                    sorted_users.append(u)
-        else:
-            sorted_users = all_users
+        from app.services.access_service import get_master_user
+        master = await get_master_user(session)
 
         return json_response({
-            "current_user_id": current_user_id,
+            "current_user_id": master.id,
             "users": [
                 {
-                    "id": u.id,
-                    "name": u.name if u.name and u.name != "Admin User" else ("Основной" if primary_user and u.id == primary_user.id else f"Профиль {u.id}"),
-                    "telegram_id": u.telegram_id,
-                    "is_primary": bool(primary_user and u.id == primary_user.id),
+                    "id": master.id,
+                    "name": master.name if master.name and master.name != "Admin User" else "Личный кабинет",
+                    "telegram_id": master.telegram_id,
+                    "is_primary": True,
                 }
-                for u in sorted_users
             ],
         })
 
 
 async def handle_create_user_profile(request: web.Request) -> web.Response:
-    """POST /api/users/create - Create a new independent user profile (max 3)."""
-    try:
-        body = await request.json()
-        name = str(body.get("name", "")).strip()
-    except Exception:
-        name = ""
-
-    async with async_session_factory() as session:
-        users = await get_all_users(session)
-        if len(users) >= 3:
-            return json_response({"error": "Достигнут лимит профилей (максимум 3)"}, 400)
-
-        user = await create_extra_profile(session, name or f"Профиль {len(users) + 1}")
-        await session.commit()
-        return json_response({
-            "id": user.id,
-            "name": user.name,
-            "telegram_id": user.telegram_id,
-        }, 201)
+    """POST /api/users/create - Disabled in single-user personal finance mode."""
+    return json_response({"error": "Многопользовательский режим отключен: система настроена строго для одного владельца."}, 400)
 
 
 async def handle_update_user_name(request: web.Request) -> web.Response:
-    """POST /api/users/rename - Update name of a user profile."""
+    """POST /api/users/rename - Update name of master user profile."""
     try:
         body = await request.json()
-        user_id = int(body.get("user_id", 0))
         new_name = str(body.get("name", "")).strip()
     except Exception:
         return json_response({"error": "Неверные данные"}, 400)
@@ -140,51 +93,16 @@ async def handle_update_user_name(request: web.Request) -> web.Response:
         return json_response({"error": "Название не может быть пустым"}, 400)
 
     async with async_session_factory() as session:
-        from app.database.models.user import User
-        user = await session.get(User, user_id)
-        if not user:
-            return json_response({"error": "Профиль не найден"}, 404)
-
-        user.name = new_name
+        from app.services.access_service import get_master_user
+        master = await get_master_user(session)
+        master.name = new_name
         await session.commit()
-        return json_response({"id": user.id, "name": user.name})
+        return json_response({"id": master.id, "name": master.name})
 
 
 async def handle_delete_user_profile(request: web.Request) -> web.Response:
-    """POST /api/users/delete - Delete a secondary profile."""
-    try:
-        body = await request.json()
-        user_id = int(body.get("user_id", 0))
-    except Exception:
-        return json_response({"error": "Неверные данные"}, 400)
-
-    async with async_session_factory() as session:
-        from app.database.models.user import User
-        from app.database.models.transaction import Transaction
-        from app.database.models.debt import Debt
-        from app.database.models.saving_goal import SavingGoal
-        from app.database.models.account import Account
-        from app.database.models.category import Category
-        from sqlalchemy import delete
-
-        users = await get_all_users(session)
-        if len(users) <= 1:
-            return json_response({"error": "Нельзя удалить единственный профиль"}, 400)
-
-        if user_id == users[0].id:
-            return json_response({"error": "Нельзя удалить основной профиль"}, 400)
-
-        user = await session.get(User, user_id)
-        if user:
-            await session.execute(delete(Transaction).where(Transaction.user_id == user_id))
-            await session.execute(delete(Debt).where(Debt.user_id == user_id))
-            await session.execute(delete(SavingGoal).where(SavingGoal.user_id == user_id))
-            await session.execute(delete(Account).where(Account.user_id == user_id))
-            await session.execute(delete(Category).where(Category.user_id == user_id))
-            await session.delete(user)
-            await session.commit()
-
-        return json_response({"success": True})
+    """POST /api/users/delete - Cannot delete master profile."""
+    return json_response({"error": "Нельзя удалить единственный профиль владельца."}, 400)
 
 
 async def handle_summary(request: web.Request) -> web.Response:
@@ -205,6 +123,7 @@ async def handle_summary(request: web.Request) -> web.Response:
                 "name": a.name,
                 "icon": a.icon,
                 "balance": a.balance,
+                "currency": getattr(a, "currency", "UZS"),
                 "is_savings": a.is_savings,
             }
             for a in summary["regular_accounts"]
@@ -215,6 +134,7 @@ async def handle_summary(request: web.Request) -> web.Response:
             "name": summary["savings_account"].name,
             "icon": summary["savings_account"].icon,
             "balance": summary["savings_account"].balance,
+            "currency": getattr(summary["savings_account"], "currency", "UZS"),
         }
 
         goals = [
@@ -234,6 +154,7 @@ async def handle_summary(request: web.Request) -> web.Response:
                 "id": tx.id,
                 "type": tx.type,
                 "amount": tx.amount,
+                "currency": getattr(tx, "currency", "UZS"),
                 "description": tx.description,
                 "account_name": tx.account.name if tx.account else None,
                 "category_name": tx.category.name if tx.category else None,
@@ -260,6 +181,8 @@ async def handle_summary(request: web.Request) -> web.Response:
             "debts_given": summary["debts_given"],
             "debts_taken": summary["debts_taken"],
             "total_capital": summary["total_capital"],
+            "rates": summary.get("rates", {}),
+            "projections": summary.get("projections", {}),
             "regular_accounts": regular_accounts,
             "savings_account": savings_acc,
             "goals": goals,
@@ -782,3 +705,21 @@ async def handle_get_history(request: web.Request) -> web.Response:
             "has_next": has_next,
             "page": page,
         })
+
+
+async def handle_get_rates(request: web.Request) -> web.Response:
+    """GET /api/rates - Get all currency exchange rates."""
+    async with async_session_factory() as session:
+        cur_service = CurrencyService(session)
+        rates = await cur_service.get_all_rates()
+        return json_response(rates)
+
+
+async def handle_sync_rates(request: web.Request) -> web.Response:
+    """POST /api/rates/sync - Sync latest rates with CBU API."""
+    async with async_session_factory() as session:
+        cur_service = CurrencyService(session)
+        success = await cur_service.fetch_cbu_rates()
+        await session.commit()
+        rates = await cur_service.get_all_rates()
+        return json_response({"success": success, "rates": rates})

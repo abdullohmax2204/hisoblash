@@ -24,7 +24,7 @@ async def cors_middleware(request: web.Request, handler):
 
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Telegram-Init-Data"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Telegram-Init-Data, X-Profile-Id"
     return response
 
 
@@ -73,6 +73,8 @@ def create_web_app() -> web.Application:
     app.router.add_post("/api/debts/return", api.handle_return_debt)
     app.router.add_get("/api/stats", api.handle_get_stats)
     app.router.add_get("/api/history", api.handle_get_history)
+    app.router.add_get("/api/rates", api.handle_get_rates)
+    app.router.add_post("/api/rates/sync", api.handle_sync_rates)
 
     # Frontend SPA entry point
     app.router.add_get("/", handle_index)

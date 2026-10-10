@@ -141,8 +141,18 @@ class SavingsService:
         source_account_id: int,
         amount: Decimal,
         description: str | None = None,
+        source: str = "manual_web",
+        idempotency_key: str | None = None,
     ) -> tuple[Transaction, Account, Account, list[SavingGoal]]:
         """Deposit into savings and return newly reached goals if any."""
+        if idempotency_key:
+            from app.services.finance_service import FinanceService
+            existing = await FinanceService(self.session).get_by_idempotency_key(user_id, idempotency_key)
+            if existing and existing.related_account_id:
+                source_acc = await self.session.get(Account, existing.account_id)
+                savings_acc = await self.session.get(Account, existing.related_account_id)
+                return existing, source_acc, savings_acc, []
+
         if amount <= Decimal("0"):
             raise ValueError("Сумма должна быть больше нуля")
 
@@ -165,6 +175,9 @@ class SavingsService:
             related_account_id=savings_acc.id,
             type=TransactionType.SAVING.value,
             amount=amount,
+            currency=source_acc.currency,
+            source=source,
+            idempotency_key=idempotency_key,
             description=description or "Отложено в накопления",
         )
         self.session.add(tx)
@@ -180,7 +193,17 @@ class SavingsService:
         dest_account_id: int,
         amount: Decimal,
         description: str | None = None,
+        source: str = "manual_web",
+        idempotency_key: str | None = None,
     ) -> tuple[Transaction, Account, Account]:
+        if idempotency_key:
+            from app.services.finance_service import FinanceService
+            existing = await FinanceService(self.session).get_by_idempotency_key(user_id, idempotency_key)
+            if existing and existing.related_account_id:
+                dest_acc = await self.session.get(Account, existing.account_id)
+                savings_acc = await self.session.get(Account, existing.related_account_id)
+                return existing, dest_acc, savings_acc
+
         if amount <= Decimal("0"):
             raise ValueError("Сумма должна быть больше нуля")
 
@@ -201,6 +224,9 @@ class SavingsService:
             related_account_id=savings_acc.id,
             type=TransactionType.SAVING_WITHDRAW.value,
             amount=amount,
+            currency=savings_acc.currency,
+            source=source,
+            idempotency_key=idempotency_key,
             description=description or "Возврат из накоплений",
         )
         self.session.add(tx)

@@ -19,17 +19,14 @@
     <!-- Top Header -->
     <header class="app-header">
       <div class="user-profile">
-        <div class="avatar" id="userAvatar" onclick="openProfilePicker()" title="Профиль">
+        <div class="avatar" id="userAvatar" title="Личный кабинет">
           <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         </div>
-        <button class="profile-pill-btn" id="profileSelectorPill" onclick="openProfilePicker()" title="Выбрать или создать профиль">
+        <div class="profile-pill-btn" style="cursor: default; pointer-events: none;">
           <div class="profile-pill-content">
-            <span class="profile-pill-name" id="currentProfileName">Основной</span>
+            <span class="profile-pill-name" id="currentProfileName">Личный кабинет</span>
           </div>
-          <svg class="profile-pill-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
+        </div>
       </div>
       <button class="icon-btn" id="toggleFullscreenBtn" onclick="toggleFullscreenMode()" title="Полноэкранный / Оконный режим" aria-label="Toggle Fullscreen">
         <svg id="fullscreenIcon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
@@ -47,6 +44,12 @@
         <div class="capital-card">
           <div class="capital-header">
             <span class="label">ОБЩИЙ КАПИТАЛ</span>
+            <div class="currency-pills-row" id="currencyPillsRow">
+              <button type="button" class="curr-pill active" data-curr="UZS" onclick="setDisplayCurrency('UZS')">UZS</button>
+              <button type="button" class="curr-pill" data-curr="USD" onclick="setDisplayCurrency('USD')">$ USD</button>
+              <button type="button" class="curr-pill" data-curr="EUR" onclick="setDisplayCurrency('EUR')">€ EUR</button>
+              <button type="button" class="curr-pill" data-curr="RUB" onclick="setDisplayCurrency('RUB')">₽ RUB</button>
+            </div>
             <button class="eye-toggle" id="toggleBalanceVisibility" aria-label="Toggle Balance">
               <svg id="eyeIcon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -709,41 +712,6 @@
       </div>
     </div>
 
-    <!-- MODAL: PROFILE PICKER -->
-    <div id="modalProfilePicker" class="modal-backdrop">
-      <div class="modal-card">
-        <div class="modal-header">
-          <h3>Профили аккаунта</h3>
-          <button class="close-modal" onclick="closeModal('modalProfilePicker')">✕</button>
-        </div>
-        <div class="profile-picker-list" id="profilePickerList">
-          <!-- Dynamically filled with profiles (up to 3) -->
-        </div>
-        <div id="profilePickerAddBox" style="margin-top: 16px;">
-          <!-- Dynamic add button or limit note -->
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL: RENAME PROFILE -->
-    <div id="modalRenameProfile" class="modal-backdrop">
-      <div class="modal-card">
-        <div class="modal-header">
-          <h3>Название профиля</h3>
-          <button class="close-modal" onclick="closeModal('modalRenameProfile')">✕</button>
-        </div>
-        <form id="formRenameProfile" onsubmit="submitRenameProfile(event)">
-          <input type="hidden" id="renameProfileUserId">
-          <div class="form-group">
-            <label>Введите новое имя</label>
-            <input type="text" id="renameProfileNameInput" class="form-input" placeholder="Например: Работа, Личный..." required maxlength="40">
-          </div>
-
-          <button type="submit" class="btn-submit btn-accent">Сохранить</button>
-        </form>
-      </div>
-    </div>
-
     <!-- MODAL: CONFIRM ACTION -->
     <div id="modalConfirm" class="modal-backdrop">
       <div class="modal-card" style="text-align: center; max-width: 360px;">
@@ -765,30 +733,11 @@
       </div>
     </div>
 
-    <!-- MODAL: NEW PROFILE -->
-    <div id="modalNewProfile" class="modal-backdrop">
-      <div class="modal-card">
-        <div class="modal-header">
-          <h3>Новый профиль</h3>
-          <button class="close-modal" onclick="closeModal('modalNewProfile')">✕</button>
-        </div>
-        <form id="formNewProfile" onsubmit="submitNewProfile(event)">
-          <div class="form-group">
-            <label>Название профиля (макс. 3 профиля)</label>
-            <input type="text" id="newProfileName" class="form-input" placeholder="Например: Работа, Бизнес, Личный..." required maxlength="40">
-            <small class="form-help">Каждый профиль имеет свои отдельные счета, категории и историю.</small>
-          </div>
-
-          <button type="submit" class="btn-submit btn-accent">Создать профиль</button>
-        </form>
-      </div>
-    </div>
-
     <!-- TOAST NOTIFICATION CONTAINER -->
     <div id="toastContainer" class="toast-container"></div>
 
   </div>
 
-  <script src="/static/app.js?v=7.0"></script>
+  <script type="module" src="/static/js/main.js?v=8.0"></script>
 </body>
 </html>

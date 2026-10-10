@@ -26,6 +26,7 @@ class Account(Base, TimestampMixin):
         Numeric(precision=15, scale=2), default=Decimal("0"), nullable=False
     )
     is_savings: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    currency: Mapped[str] = mapped_column(String(10), default="UZS", nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 

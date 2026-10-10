@@ -47,24 +47,27 @@ DEFAULT_EXPENSE_CATEGORIES = [
 
 async def ensure_user_exists(
     session: AsyncSession,
-    telegram_id: int,
-    name: str,
+    telegram_id: int | None = None,
+    name: str = "",
 ) -> User:
-    """Get or create a user with default accounts and categories.
+    """Get or create the single master personal finance user.
 
-    If the user already exists, returns them immediately.
-    If new, creates default accounts and income/expense categories.
+    All authorized Telegram accounts access this single master personal finance profile.
     """
-    query = select(User).where(User.telegram_id == telegram_id)
+    from app.core.config import settings
+
+    target_tg_id = settings.admin_user_id
+    query = select(User).where(User.telegram_id == target_tg_id)
     result = await session.execute(query)
     user = result.scalar_one_or_none()
 
     if user is not None:
         return user
 
-    # Create new user
-    logger.info("Creating new user: telegram_id=%d name=%s", telegram_id, name)
-    user = User(telegram_id=telegram_id, name=name)
+    # Create master user
+    master_name = name if (telegram_id == target_tg_id and name) else "Admin User"
+    logger.info("Creating master user: telegram_id=%d name=%s", target_tg_id, master_name)
+    user = User(telegram_id=target_tg_id, name=master_name)
     session.add(user)
     await session.flush()  # Get user.id
 
@@ -73,6 +76,7 @@ async def ensure_user_exists(
         account = Account(
             user_id=user.id,
             balance=Decimal("0"),
+            currency="UZS",
             **acc_data,
         )
         session.add(account)
@@ -96,7 +100,7 @@ async def ensure_user_exists(
         session.add(category)
 
     await session.flush()
-    logger.info("Created user with defaults: user_id=%d", user.id)
+    logger.info("Created master user with defaults: user_id=%d", user.id)
     return user
 
 
@@ -124,20 +128,7 @@ async def update_user_salary(
 
 
 async def get_all_users(session: AsyncSession) -> list[User]:
-    """Get all registered user profiles in the database."""
-    result = await session.execute(select(User).order_by(User.id.asc()))
-    return list(result.scalars().all())
+    """Get the master user profile list."""
+    master = await ensure_user_exists(session)
+    return [master]
 
-
-async def create_extra_profile(
-    session: AsyncSession,
-    name: str,
-) -> User:
-    """Create a new independent profile/user for testing or secondary accounts."""
-    import random
-    rand_tg_id = random.randint(900000000, 999999999)
-    return await ensure_user_exists(
-        session=session,
-        telegram_id=rand_tg_id,
-        name=name.strip() or f"Профиль {rand_tg_id}",
-    )

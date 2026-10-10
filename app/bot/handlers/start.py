@@ -27,6 +27,9 @@ async def get_main_menu_text(user_id: int, session: AsyncSession) -> str:
     available = summary["available_funds"]
     savings = summary["savings_balance"]
     capital = summary["total_capital"]
+    projections = summary.get("projections", {})
+    usd_val = projections.get("USD")
+    usd_str = f" <i>(≈ ${usd_val:,.2f})</i>" if usd_val else ""
 
     goal_extra = ""
     if goals_overview["has_goals"]:
@@ -37,7 +40,7 @@ async def get_main_menu_text(user_id: int, session: AsyncSession) -> str:
         "━━━━━━━━━━━━━━━━━━━━",
         f"💳 <b>Доступно:</b>  {format_amount(available)} сум",
         f"💵 <b>Накоплено:</b> {format_amount(savings)} сум{goal_extra}",
-        f"💰 <b>Капитал:</b>    {format_amount(capital)} сум",
+        f"💰 <b>Капитал:</b>    {format_amount(capital)} сум{usd_str}",
         "━━━━━━━━━━━━━━━━━━━━\n",
         "Выберите действие:",
     ]

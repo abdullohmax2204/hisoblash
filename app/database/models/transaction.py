@@ -47,6 +47,14 @@ class Transaction(Base, TimestampMixin):
     amount: Mapped[Decimal] = mapped_column(
         Numeric(precision=15, scale=2), nullable=False
     )
+    currency: Mapped[str] = mapped_column(String(10), default="UZS", nullable=False)
+    exchange_rate: Mapped[Decimal] = mapped_column(
+        Numeric(precision=15, scale=4), default=Decimal("1.0"), nullable=False
+    )
+    source: Mapped[str] = mapped_column(String(30), default="manual_web", nullable=False)
+    idempotency_key: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, index=True
+    )
     description: Mapped[str | None] = mapped_column(String(500), nullable=True)
     related_account_id: Mapped[int | None] = mapped_column(
         ForeignKey("accounts.id"), nullable=True

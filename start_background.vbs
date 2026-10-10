@@ -1,5 +1,8 @@
 ' Скрипт для запуска бота в полностью скрытом фоновом режиме (без окна терминала)
+Set fso = CreateObject("Scripting.FileSystemObject")
+scriptDir = fso.GetParentFolderName(WScript.ScriptFullName)
 Set WshShell = CreateObject("WScript.Shell")
-WshShell.CurrentDirectory = "D:\1. Work\Hisoblash_bot"
-WshShell.Run "D:\1. Work\Hisoblash_bot\.venv\Scripts\pythonw.exe -m app", 0, False
+WshShell.CurrentDirectory = scriptDir
+WshShell.Run """" & scriptDir & "\.venv\Scripts\pythonw.exe"" -m app", 0, False
 Set WshShell = Nothing
+Set fso = Nothing

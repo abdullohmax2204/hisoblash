@@ -237,6 +237,7 @@ async def income_savings_percent_selected(
             category_id=category_id,
             amount=total_amount,
             description=comment,
+            source="bot_keyboard",
         )
 
         savings_deposited = Decimal("0")

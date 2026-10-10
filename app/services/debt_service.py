@@ -1,4 +1,4 @@
-"""Debt service — manages giving, taking, and returning debts."""
+"""Debt service — manages giving, taking, and returning debts with ledger consistency."""
 
 from decimal import Decimal
 import logging
@@ -22,6 +22,8 @@ class DebtService:
         person_name: str,
         amount: Decimal,
         account_id: int,
+        source: str = "manual_web",
+        idempotency_key: str | None = None,
     ) -> tuple[Debt, Transaction, Account]:
         """Give debt (I lent money to someone):
         - Deduct from account
@@ -29,6 +31,14 @@ class DebtService:
         - Create DEBT_GIVEN transaction
         - Total capital remains unchanged (cash becomes receivable asset)
         """
+        if idempotency_key:
+            from app.services.finance_service import FinanceService
+            existing = await FinanceService(self.session).get_by_idempotency_key(user_id, idempotency_key)
+            if existing and existing.debt_id:
+                debt = await self.session.get(Debt, existing.debt_id)
+                account = await self.session.get(Account, existing.account_id)
+                return debt, existing, account
+
         if amount <= Decimal("0"):
             raise ValueError("Сумма должна быть больше нуля")
 
@@ -62,6 +72,9 @@ class DebtService:
             debt_id=debt.id,
             type=TransactionType.DEBT_GIVEN.value,
             amount=amount,
+            currency=account.currency,
+            source=source,
+            idempotency_key=idempotency_key,
             description=f"Дал в долг: {clean_person}",
         )
         self.session.add(tx)
@@ -75,12 +88,22 @@ class DebtService:
         person_name: str,
         amount: Decimal,
         account_id: int,
+        source: str = "manual_web",
+        idempotency_key: str | None = None,
     ) -> tuple[Debt, Transaction, Account]:
         """Take debt (I borrowed money from someone):
         - Add to account
         - Create Debt record (TAKEN)
-        - Create DEBT_TAKEN / INCOME transaction
+        - Create DEBT_TAKEN transaction
         """
+        if idempotency_key:
+            from app.services.finance_service import FinanceService
+            existing = await FinanceService(self.session).get_by_idempotency_key(user_id, idempotency_key)
+            if existing and existing.debt_id:
+                debt = await self.session.get(Debt, existing.debt_id)
+                account = await self.session.get(Account, existing.account_id)
+                return debt, existing, account
+
         if amount <= Decimal("0"):
             raise ValueError("Сумма должна быть больше нуля")
 
@@ -109,8 +132,11 @@ class DebtService:
             user_id=user_id,
             account_id=account.id,
             debt_id=debt.id,
-            type=TransactionType.INCOME.value,
+            type=TransactionType.INCOME.value,  # Backward compatible for balance & stats
             amount=amount,
+            currency=account.currency,
+            source=source,
+            idempotency_key=idempotency_key,
             description=f"Взял в долг у: {person_name}",
         )
         self.session.add(tx)
@@ -124,13 +150,27 @@ class DebtService:
         debt_id: int,
         amount: Decimal,
         account_id: int,
+        source: str = "manual_web",
+        idempotency_key: str | None = None,
     ) -> tuple[Debt, Transaction, Account]:
         """Return / settle a debt (someone returned money to user, or user paid back):
         If debt.type == GIVEN (someone returning to me):
           - Add to account
           - Decrease debt remaining amount
           - If remaining == 0 -> is_settled = True
+        If debt.type == TAKEN (I am paying back):
+          - Deduct from account
+          - Decrease debt remaining amount
+          - If remaining == 0 -> is_settled = True
         """
+        if idempotency_key:
+            from app.services.finance_service import FinanceService
+            existing = await FinanceService(self.session).get_by_idempotency_key(user_id, idempotency_key)
+            if existing and existing.debt_id:
+                debt = await self.session.get(Debt, existing.debt_id)
+                account = await self.session.get(Account, existing.account_id)
+                return debt, existing, account
+
         if amount <= Decimal("0"):
             raise ValueError("Сумма должна быть больше нуля")
 
@@ -158,6 +198,9 @@ class DebtService:
                 debt_id=debt.id,
                 type=TransactionType.DEBT_RETURN.value,
                 amount=amount,
+                currency=account.currency,
+                source=source,
+                idempotency_key=idempotency_key,
                 description=f"Возврат долга от: {debt.person_name}",
             )
             self.session.add(tx)
@@ -178,6 +221,9 @@ class DebtService:
                 debt_id=debt.id,
                 type=TransactionType.EXPENSE.value,
                 amount=amount,
+                currency=account.currency,
+                source=source,
+                idempotency_key=idempotency_key,
                 description=f"Погашение моего долга перед: {debt.person_name}",
             )
             self.session.add(tx)
