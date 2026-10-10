@@ -171,39 +171,6 @@ body {
   font-family: 'Outfit', -apple-system, sans-serif;
 }
 
-.lang-switcher {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  background: var(--glass-bg-sub);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-inset);
-  padding: 3px 4px;
-  border-radius: 20px;
-}
-
-.lang-pill-btn {
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: inherit;
-}
-
-.lang-pill-btn:hover {
-  color: var(--text-primary);
-}
-
-.lang-pill-btn.active {
-  background: var(--text-primary);
-  color: var(--bg);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-}
 
 /* Capital Header Actions (Eye Toggle + Fullscreen Button) */
 .capital-header-actions {

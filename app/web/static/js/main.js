@@ -180,15 +180,6 @@ window.submitTransfer = (e) => submitTransfer(e, loadSummary);
 window.submitSaveDeposit = (e) => submitSaveDeposit(e, loadSummary);
 window.submitSaveWithdraw = (e) => submitSaveWithdraw(e, loadSummary);
 
-window.changeAppLanguage = (lang) => {
-  haptic('light');
-  setLanguage(lang, () => {
-    renderDashboard();
-    renderAccountsList();
-    renderGoals();
-  });
-};
-
 // ==================== KEYBOARD SHORTCUTS ====================
 // Press 'F' or 'f' to toggle fullscreen mode (unless typing in inputs)
 document.addEventListener('keydown', (e) => {
@@ -214,8 +205,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Initialize Language (defaults to Uzbek/Russian)
-  setLanguage(getLanguage());
+  // Primary language is Russian
+  setLanguage('ru');
 
   // Balance Visibility Toggle
   document.getElementById('toggleBalanceVisibility')?.addEventListener('click', () => {
