@@ -228,6 +228,7 @@
 
         <div class="section-title-bar mt-4">
           <h3>Цели накоплений</h3>
+          <button class="btn-primary-sm" onclick="openModal('modalNewGoal')">+ Создать цель</button>
         </div>
         
         <div class="savings-card">
@@ -319,14 +320,53 @@
         </div>
       </section>
 
-      <!-- TAB 6: NOTIFICATIONS -->
+      <!-- TAB 6: NOTIFICATIONS & INFO -->
       <section id="tab-notifications" class="tab-content">
-        <div class="section-title-bar">
-          <h3>Уведомления</h3>
+        <!-- Quick Tips & Shortcuts Card -->
+        <div class="info-shortcuts-card">
+          <div class="info-shortcuts-header">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>Быстрые подсказки и функции</span>
+          </div>
+          <div class="info-shortcuts-grid">
+            <div class="shortcut-item">
+              <span class="shortcut-key">F</span>
+              <span class="shortcut-desc">Полноэкранный режим без отвлекающих панелей</span>
+            </div>
+            <div class="shortcut-item">
+              <span class="shortcut-key">👁</span>
+              <span class="shortcut-desc">Быстрое скрытие баланса для приватности</span>
+            </div>
+            <div class="shortcut-item">
+              <span class="shortcut-key">💱</span>
+              <span class="shortcut-desc">Пересчет капитала по курсу ЦБ (UZS, USD, EUR, RUB)</span>
+            </div>
+            <div class="shortcut-item">
+              <span class="shortcut-key">⚡</span>
+              <span class="shortcut-desc">Авторасчет нагрузки на бюджет от зарплаты</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title-bar mt-4">
+          <h3>Журнал событий</h3>
           <button class="link-btn" onclick="clearAllNotifications()">Очистить всё</button>
         </div>
         <div id="notificationsList" class="notifications-list">
-          <div class="empty-state">Нет новых уведомлений</div>
+          <div class="notif-empty-state">
+            <div class="notif-empty-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </div>
+            <div class="notif-empty-title">Нет новых уведомлений</div>
+            <div class="notif-empty-sub">Оповещения об операциях и целях появятся здесь</div>
+          </div>
         </div>
       </section>
 
@@ -513,6 +553,13 @@
           <div class="form-group">
             <label>Сумма перевода (сум)</label>
             <input type="text" inputmode="numeric" id="transferAmount" class="form-input amount-input" placeholder="0" data-display-id="transferDisplay" required autocomplete="off">
+            <div class="quick-chips">
+              <button type="button" onclick="addAmount('transferAmount', 50000)">+50 000</button>
+              <button type="button" onclick="addAmount('transferAmount', 100000)">+100 000</button>
+              <button type="button" onclick="addAmount('transferAmount', 500000)">+500 000</button>
+              <button type="button" onclick="addAmount('transferAmount', 1000000)">+1 000 000</button>
+              <button type="button" onclick="clearAmount('transferAmount')">⌫ Очистить</button>
+            </div>
           </div>
 
           <div class="form-group">
@@ -588,6 +635,13 @@
           <div class="form-group">
             <label>Сумма снятия (сум)</label>
             <input type="text" inputmode="numeric" id="saveWithdrawAmount" class="form-input amount-input" placeholder="0" data-display-id="saveWithdrawDisplay" required autocomplete="off">
+            <div class="quick-chips">
+              <button type="button" onclick="addAmount('saveWithdrawAmount', 50000)">+50 000</button>
+              <button type="button" onclick="addAmount('saveWithdrawAmount', 100000)">+100 000</button>
+              <button type="button" onclick="addAmount('saveWithdrawAmount', 500000)">+500 000</button>
+              <button type="button" onclick="addAmount('saveWithdrawAmount', 1000000)">+1 000 000</button>
+              <button type="button" onclick="clearAmount('saveWithdrawAmount')">⌫ Очистить</button>
+            </div>
           </div>
 
           <div class="form-group">

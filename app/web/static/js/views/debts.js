@@ -24,12 +24,50 @@ export function renderDebtsList() {
   const list = state.debts[state.currentDebtType] || [];
 
   if (!list.length) {
-    const emptyText = state.currentDebtType === 'given' ? 'Мне должны' : 'Я должен';
-    container.innerHTML = `<div class="empty-state">Нет активных записей в разделе "${emptyText}"</div>`;
+    if (state.currentDebtType === 'given') {
+      container.innerHTML = `
+        <div class="debt-empty-card" onclick="window.openGiveDebtModal()">
+          <div class="debt-empty-icon given">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="8.5" cy="7" r="4"></circle>
+              <line x1="20" y1="8" x2="20" y2="14"></line>
+              <line x1="23" y1="11" x2="17" y2="11"></line>
+            </svg>
+          </div>
+          <div class="debt-empty-info">
+            <div class="debt-empty-title">Вам никто не должен</div>
+            <div class="debt-empty-sub">+ Нажмите, чтобы записать, если дали в долг</div>
+          </div>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="debt-empty-card" onclick="window.openTakeDebtModal()">
+          <div class="debt-empty-icon taken">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div class="debt-empty-info">
+            <div class="debt-empty-title">У вас нет активных долгов</div>
+            <div class="debt-empty-sub">Все обязательства закрыты. Нажмите, если взяли взаймы</div>
+          </div>
+        </div>
+      `;
+    }
     return;
   }
 
-  container.innerHTML = list.map(d => {
+  const totalRemaining = list.reduce((sum, d) => sum + (Number(d.remaining_amount) || 0), 0);
+  const summaryBarHTML = `
+    <div class="debt-summary-bar">
+      <span class="debt-summary-label">${state.currentDebtType === 'given' ? 'Всего вам должны' : 'Ваш общий долг'}</span>
+      <span class="debt-summary-val ${state.currentDebtType === 'given' ? 'text-green' : 'text-red'}">${formatMoney(totalRemaining)}</span>
+    </div>
+  `;
+
+  const itemsHTML = list.map(d => {
     const personSafe = (d.person_name || 'Контакт').replace(/'/g, "\\'");
     const actionLabel = state.currentDebtType === 'given' ? 'Вернули долг' : 'Погасить';
     return `
@@ -53,6 +91,8 @@ export function renderDebtsList() {
       </div>
     `;
   }).join('');
+
+  container.innerHTML = summaryBarHTML + itemsHTML;
 }
 
 export function switchDebtType(type) {

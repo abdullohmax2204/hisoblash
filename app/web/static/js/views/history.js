@@ -27,7 +27,18 @@ export function renderFullHistory(transactions) {
   if (!container) return;
 
   if (!transactions.length && state.historyPage === 0) {
-    container.innerHTML = '<div class="empty-state">История операций пуста</div>';
+    container.innerHTML = `
+      <div class="tx-empty-state">
+        <div class="tx-empty-icon">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+            <polyline points="12 8 12 12 14 14"></polyline>
+            <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"></path>
+          </svg>
+        </div>
+        <div class="tx-empty-title">История операций пуста</div>
+        <div class="tx-empty-sub">Все совершённые доходы, расходы и переводы будут сохраняться здесь</div>
+      </div>
+    `;
     if (pagination) pagination.style.display = 'none';
     return;
   }

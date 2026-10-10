@@ -16,13 +16,29 @@ export function renderStats(stats) {
   if (expEl) expEl.textContent = formatMoney(stats.total_expense);
   if (netEl) netEl.textContent = formatMoney(stats.net_income);
 
-  // Render Category Breakdown
+  // Render Category Breakdown & Chart
   const topList = document.getElementById('topCategoriesList');
+  const chartWrapper = document.querySelector('.chart-container');
+  const categories = stats.top_categories || [];
+
   if (topList) {
-    if (!stats.top_categories || !stats.top_categories.length) {
-      topList.innerHTML = '<div class="empty-state">За этот период расходов не найдено</div>';
+    if (!categories.length) {
+      if (chartWrapper) chartWrapper.style.display = 'none';
+      topList.innerHTML = `
+        <div class="chart-empty-state">
+          <div class="chart-empty-icon">
+            <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 2a10 10 0 0 1 10 10"></path>
+            </svg>
+          </div>
+          <div class="chart-empty-title">Нет расходов за выбранный период</div>
+          <div class="chart-empty-sub">Запишите расход кнопкой на главной или выберите другой период выше</div>
+        </div>
+      `;
     } else {
-      topList.innerHTML = stats.top_categories.map(c => `
+      if (chartWrapper) chartWrapper.style.display = 'block';
+      topList.innerHTML = categories.map(c => `
         <div class="cat-row">
           <div class="cat-row-left">
             <span>${c.icon || '🛍'}</span>
@@ -35,7 +51,7 @@ export function renderStats(stats) {
   }
 
   // Render Chart.js
-  renderChart(stats.top_categories || []);
+  renderChart(categories);
 }
 
 export function renderChart(categories) {

@@ -18,7 +18,21 @@ export function renderGoals() {
   if (!goalsContainer) return;
 
   if (!goals.length) {
-    goalsContainer.innerHTML = '<div class="empty-state">Целей накоплений пока нет. Нажмите "+ Новая цель"</div>';
+    goalsContainer.innerHTML = `
+      <div class="goal-empty-card" onclick="openModal('modalNewGoal')">
+        <div class="goal-empty-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="6"></circle>
+            <circle cx="12" cy="12" r="2"></circle>
+          </svg>
+        </div>
+        <div class="goal-empty-info">
+          <div class="goal-empty-title">+ Создать первую цель накоплений</div>
+          <div class="goal-empty-sub">Автомобиль, подушка безопасности, техника или отпуск</div>
+        </div>
+      </div>
+    `;
     return;
   }
 

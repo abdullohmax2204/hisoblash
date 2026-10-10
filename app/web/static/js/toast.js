@@ -37,12 +37,63 @@ export function addNotification({ title, message, type = 'info', isRead = false 
 }
 
 export function showToast(message, type = 'success', title = null) {
+  // Persist to notification center
   addNotification({
     title: title,
     message: message,
     type: type,
     isRead: false,
   });
+
+  // Render floating toast pill on screen
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  // Create toast pill element
+  const pill = document.createElement('div');
+  pill.className = `toast-pill ${type}`;
+
+  let iconSvg = '';
+  if (type === 'error') {
+    iconSvg = `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+    haptic('error');
+  } else if (type === 'info') {
+    iconSvg = `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+    haptic('light');
+  } else if (type === 'warning') {
+    iconSvg = `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+    haptic('medium');
+  } else {
+    // success default
+    iconSvg = `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    haptic('light');
+  }
+
+  pill.innerHTML = `
+    <span class="toast-icon-wrap">${iconSvg}</span>
+    <span class="toast-text">${message}</span>
+  `;
+
+  // Dismiss on click
+  pill.addEventListener('click', () => {
+    pill.classList.add('hide');
+    setTimeout(() => pill.remove(), 200);
+  });
+
+  container.appendChild(pill);
+
+  // Auto remove after 3.2s
+  setTimeout(() => {
+    if (pill.parentNode) {
+      pill.classList.add('hide');
+      setTimeout(() => pill.remove(), 220);
+    }
+  }, 3200);
 }
 
 export function renderNotifications() {
@@ -54,7 +105,18 @@ export function renderNotifications() {
   updateNotificationBadge();
 
   if (!state.notifications.length) {
-    container.innerHTML = '<div class="empty-state">Нет новых уведомлений</div>';
+    container.innerHTML = `
+      <div class="notif-empty-state">
+        <div class="notif-empty-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+        </div>
+        <div class="notif-empty-title">Нет новых уведомлений</div>
+        <div class="notif-empty-sub">Оповещения об операциях и целях появятся здесь</div>
+      </div>
+    `;
     return;
   }
 

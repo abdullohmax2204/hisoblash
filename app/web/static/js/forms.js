@@ -130,6 +130,11 @@ export async function submitTransfer(e, onCompleted) {
       return;
     }
 
+    if (String(from_account_id) === String(to_account_id)) {
+      showToast('Счета списания и зачисления должны отличаться', 'warning');
+      return;
+    }
+
     try {
       await apiFetch('/api/transactions/transfer', {
         method: 'POST',
