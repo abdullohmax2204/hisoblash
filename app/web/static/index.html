@@ -16,23 +16,17 @@
 <body>
   <div id="app" class="app-container">
     
-    <!-- Top Header -->
+    <!-- Top Header (Clean Brand + Language Switcher) -->
     <header class="app-header">
-      <div class="user-profile">
-        <div class="avatar" id="userAvatar" title="Личный кабинет">
-          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        </div>
-        <div class="profile-pill-btn" style="cursor: default; pointer-events: none;">
-          <div class="profile-pill-content">
-            <span class="profile-pill-name" id="currentProfileName">Личный кабинет</span>
-          </div>
-        </div>
+      <div class="app-brand">
+        <span class="app-brand-icon">💎</span>
+        <span class="app-brand-name" data-i18n="app_title">Hisoblash</span>
       </div>
-      <button class="icon-btn" id="toggleFullscreenBtn" onclick="toggleFullscreenMode()" title="Полноэкранный / Оконный режим" aria-label="Toggle Fullscreen">
-        <svg id="fullscreenIcon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
-          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-        </svg>
-      </button>
+      <div class="lang-switcher" id="langSwitcher" role="group" aria-label="Language Switcher">
+        <button type="button" class="lang-pill-btn" data-lang="uz" onclick="changeAppLanguage('uz')">UZ</button>
+        <button type="button" class="lang-pill-btn active" data-lang="ru" onclick="changeAppLanguage('ru')">RU</button>
+        <button type="button" class="lang-pill-btn" data-lang="en" onclick="changeAppLanguage('en')">EN</button>
+      </div>
     </header>
 
     <!-- Main Content Area -->
@@ -43,35 +37,42 @@
         <!-- Capital Hero Card -->
         <div class="capital-card">
           <div class="capital-header">
-            <span class="label">ОБЩИЙ КАПИТАЛ</span>
+            <span class="label" data-i18n="total_capital">ОБЩИЙ КАПИТАЛ</span>
             <div class="currency-pills-row" id="currencyPillsRow">
               <button type="button" class="curr-pill active" data-curr="UZS" onclick="setDisplayCurrency('UZS')">UZS</button>
               <button type="button" class="curr-pill" data-curr="USD" onclick="setDisplayCurrency('USD')">$ USD</button>
               <button type="button" class="curr-pill" data-curr="EUR" onclick="setDisplayCurrency('EUR')">€ EUR</button>
               <button type="button" class="curr-pill" data-curr="RUB" onclick="setDisplayCurrency('RUB')">₽ RUB</button>
             </div>
-            <button class="eye-toggle" id="toggleBalanceVisibility" aria-label="Toggle Balance">
-              <svg id="eyeIcon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
+            <div class="capital-header-actions">
+              <button class="eye-toggle" id="toggleBalanceVisibility" aria-label="Toggle Balance" data-i18n-title="eye_tooltip" title="Скрыть / показать баланс">
+                <svg id="eyeIcon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+              <button class="eye-toggle fullscreen-card-btn" id="toggleFullscreenBtn" onclick="toggleFullscreenMode()" data-i18n-title="fullscreen_tooltip" title="Полноэкранный режим (F)" aria-label="Toggle Fullscreen">
+                <svg id="fullscreenIcon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+              </button>
+            </div>
           </div>
           <div class="capital-amount" id="totalCapital">0 сум</div>
 
           <div class="capital-breakdown">
             <div class="breakdown-item">
-              <span class="mini-label">Доступно</span>
+              <span class="mini-label" data-i18n="available">Доступно</span>
               <span class="mini-val text-green" id="availableFunds">0 сум</span>
             </div>
             <div class="breakdown-divider"></div>
             <div class="breakdown-item">
-              <span class="mini-label">Накопления</span>
+              <span class="mini-label" data-i18n="savings">Накопления</span>
               <span class="mini-val text-amber" id="savingsBalance">0 сум</span>
             </div>
             <div class="breakdown-divider"></div>
             <div class="breakdown-item">
-              <span class="mini-label">В долгах (+/-)</span>
+              <span class="mini-label" data-i18n="debts_net">В долгах (+/-)</span>
               <span class="mini-val text-blue" id="debtsNet">0 сум</span>
             </div>
           </div>
@@ -85,7 +86,7 @@
                 <path d="M12 19V5M5 12l7-7 7 7"/>
               </svg>
             </div>
-            <span>Доход</span>
+            <span data-i18n="action_income">Доход</span>
           </button>
           <button class="action-btn expense-btn" onclick="openModal('modalExpense')">
             <div class="btn-icon-badge icon-expense">
@@ -93,7 +94,7 @@
                 <path d="M12 5v14M5 12l7 7 7-7"/>
               </svg>
             </div>
-            <span>Расход</span>
+            <span data-i18n="action_expense">Расход</span>
           </button>
           <button class="action-btn transfer-btn" onclick="openModal('modalTransfer')">
             <div class="btn-icon-badge icon-transfer">
@@ -104,7 +105,7 @@
                 <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
               </svg>
             </div>
-            <span>Перевод</span>
+            <span data-i18n="action_transfer">Перевод</span>
           </button>
           <button class="action-btn save-btn" onclick="openModal('modalSaveDeposit')">
             <div class="btn-icon-badge icon-save">
@@ -114,7 +115,7 @@
                 <circle cx="12" cy="12" r="2"></circle>
               </svg>
             </div>
-            <span>Отложить</span>
+            <span data-i18n="deposit_btn">Пополнить</span>
           </button>
         </div>
 
@@ -316,7 +317,7 @@
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
           </svg>
         </div>
-        <span>Главная</span>
+        <span data-i18n="nav_home">Главная</span>
       </button>
 
       <button class="nav-item" data-tab="tab-accounts" onclick="switchTab('tab-accounts')">
@@ -326,7 +327,7 @@
             <line x1="2" y1="10" x2="22" y2="10"></line>
           </svg>
         </div>
-        <span>Счета</span>
+        <span data-i18n="nav_accounts">Счета</span>
       </button>
 
       <button class="nav-item" data-tab="tab-stats" onclick="switchTab('tab-stats')">
@@ -337,7 +338,7 @@
             <line x1="6" y1="20" x2="6" y2="14"></line>
           </svg>
         </div>
-        <span>Анализ</span>
+        <span data-i18n="nav_stats">Анализ</span>
       </button>
 
       <button class="nav-item" data-tab="tab-debts" onclick="switchTab('tab-debts')">
@@ -349,7 +350,7 @@
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
         </div>
-        <span>Долги</span>
+        <span data-i18n="nav_debts">Долги</span>
       </button>
 
       <button class="nav-item" data-tab="tab-history" onclick="switchTab('tab-history')">
@@ -359,7 +360,7 @@
             <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"></path>
           </svg>
         </div>
-        <span>История</span>
+        <span data-i18n="nav_history">История</span>
       </button>
 
       <button class="nav-item" data-tab="tab-notifications" onclick="switchTab('tab-notifications')">
@@ -370,7 +371,7 @@
           </svg>
           <span class="notification-badge-dot" id="notifBadgeDot"></span>
         </div>
-        <span>Инфо</span>
+        <span data-i18n="nav_info">Инфо</span>
       </button>
     </nav>
 

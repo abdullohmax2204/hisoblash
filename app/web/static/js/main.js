@@ -47,9 +47,8 @@ import {
   openGiveDebtModal,
   openTakeDebtModal,
   openReturnDebtModal,
-} from './views/debts.js';
 import { loadHistory, loadHistoryPage, deleteTransaction } from './views/history.js';
-import { loadUserProfiles, updateProfilePillUI } from './views/profiles.js';
+import { t, setLanguage, getLanguage } from './i18n.js';
 import {
   submitIncome,
   submitExpense,
@@ -181,6 +180,28 @@ window.submitTransfer = (e) => submitTransfer(e, loadSummary);
 window.submitSaveDeposit = (e) => submitSaveDeposit(e, loadSummary);
 window.submitSaveWithdraw = (e) => submitSaveWithdraw(e, loadSummary);
 
+window.changeAppLanguage = (lang) => {
+  haptic('light');
+  setLanguage(lang, () => {
+    renderDashboard();
+    renderAccountsList();
+    renderGoals();
+  });
+};
+
+// ==================== KEYBOARD SHORTCUTS ====================
+// Press 'F' or 'f' to toggle fullscreen mode (unless typing in inputs)
+document.addEventListener('keydown', (e) => {
+  const activeTag = document.activeElement?.tagName?.toLowerCase();
+  if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select' || document.activeElement?.isContentEditable) {
+    return;
+  }
+  if (e.key === 'f' || e.key === 'F') {
+    e.preventDefault();
+    toggleFullscreenMode();
+  }
+});
+
 // ==================== APP INITIALIZATION ====================
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -193,19 +214,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Telegram User Avatar & Name
-  if (tg?.initDataUnsafe?.user) {
-    const u = tg.initDataUnsafe.user;
-    const avatarEl = document.getElementById('userAvatar');
-    if (avatarEl) {
-      if (u.photo_url) {
-        avatarEl.innerHTML = `<img src="${u.photo_url}" class="avatar-photo" alt="Avatar" />`;
-      } else {
-        const initial = (u.first_name || 'U')[0].toUpperCase();
-        avatarEl.textContent = initial;
-      }
-    }
-  }
+  // Initialize Language (defaults to Uzbek/Russian)
+  setLanguage(getLanguage());
 
   // Balance Visibility Toggle
   document.getElementById('toggleBalanceVisibility')?.addEventListener('click', () => {
@@ -253,7 +263,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Load initial domain data
-  await loadUserProfiles();
   await loadSummary();
   await loadCategories();
 });

@@ -150,93 +150,88 @@ body {
   }
 }
 
-.user-profile {
+/* ===== APP HEADER BRAND & LANGUAGE SWITCHER ===== */
+.app-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
+  gap: 8px;
+  user-select: none;
 }
 
-#toggleFullscreenBtn {
-  flex-shrink: 0;
-  margin-left: 2px;
+.app-brand-icon {
+  font-size: 18px;
+  line-height: 1;
 }
 
-.avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: var(--hero-card-bg);
-  color: var(--hero-card-text);
+.app-brand-name {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--text-primary);
+  font-family: 'Outfit', -apple-system, sans-serif;
+}
+
+.lang-switcher {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  font-weight: 700;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-  border: 1.5px solid var(--glass-border-light);
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-.avatar:active { transform: scale(0.94); }
-
-.avatar-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-  display: block;
-}
-
-.profile-pill-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  gap: 2px;
+  background: var(--glass-bg-sub);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-inset);
-  color: var(--text-primary);
-  border-radius: var(--radius-sm);
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 600;
+  padding: 3px 4px;
+  border-radius: 20px;
+}
+
+.lang-pill-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 14px;
   cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  min-width: 0;
+  transition: all 0.15s ease;
   font-family: inherit;
 }
 
-.profile-pill-btn:active {
-  transform: scale(0.97);
+.lang-pill-btn:hover {
+  color: var(--text-primary);
+}
+
+.lang-pill-btn.active {
+  background: var(--text-primary);
+  color: var(--bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Capital Header Actions (Eye Toggle + Fullscreen Button) */
+.capital-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fullscreen-card-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.fullscreen-card-btn:hover {
+  color: var(--text-primary);
   background: var(--glass-bg-hover);
 }
 
-.profile-pill-content {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-
-.profile-pill-name {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 700;
-  letter-spacing: -0.2px;
-  font-size: 13px;
-}
-
-.profile-pill-arrow {
-  color: var(--text-secondary);
-  flex-shrink: 0;
-  margin-left: 6px;
+.fullscreen-card-btn:active {
+  transform: scale(0.92);
 }
 
 /* Profile Picker Modal List */
